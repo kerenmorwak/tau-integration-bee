@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>מאגר 2026 · Integration Bee אוניברסיטת תל אביב</title>
+<meta name="description" content="כל האינטגרלים מתחרות 2026 עם תשובות: מבחן המוקדמות, הגמר, הדו־קרב ומצגת הגמר.">
+<meta property="og:title" content="Integration Bee · אוניברסיטת תל אביב">
+<meta property="og:description" content="תחרות האינטגרלים של הפקולטה למדעים מדויקים">
+<meta property="og:image" content="assets/img/og.jpg">
+<link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/css/fonts.css">
+<link rel="stylesheet" href="assets/vendor/katex/katex.min.css">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="index.html" aria-label="Integration Bee · דף הבית">
+      <img class="brand-mark" src="assets/img/favicon.svg" alt="">
+      <span><span class="brand-name">INTEGRATION BEE</span><span class="brand-sub">אוניברסיטת תל אביב</span></span>
+    </a>
+    <button class="menu-btn" type="button" aria-expanded="false" aria-controls="nav">תפריט</button>
+    <nav class="nav" id="nav" aria-label="ניווט ראשי">
+      <a href="index.html#format">מבנה התחרות</a>
+      <a href="index.html#champions">אלופי 2026</a>
+      <a href="index.html#team">הצוות</a>
+      <a href="archive-2026.html" aria-current="page">מאגר 2026</a>
+      <a href="simulation.html">סימולציה</a>
+      <a class="nav-cta" href="index.html#register">הרשמה</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="board page-head">
+    <div class="wrap">
+      <h1>מאגר <span class="latin">2026</span></h1>
+      <p>כל האינטגרלים מתחרות 2026, מהמוקדמות ועד הדו־קרב הסופי. נסו לפתור לפני שאתם מציצים בתשובה.</p>
+    </div>
+  </section>
+  <nav class="subnav" aria-label="בעמוד זה">
+    <div class="wrap">
+      <a href="#qualifying">מבחן המוקדמות</a>
+      <a href="#finals">הגמר</a>
+      <a href="#slides">מצגת הגמר</a>
+      <a href="#quiz-sec">ניוטון או לייבניץ</a>
+      <a href="#photos">תמונות</a>
+      <a href="#downloads">קבצים</a>
+    </div>
+  </nav>
+
+  <section class="section" id="qualifying">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <h2>מבחן המוקדמות</h2>
+          <p>20 אינטגרלים ב־30 דקות, בלי מחשבון. ניגשו כ־50 סטודנטים ממתמטיקה, פיזיקה ומדעי המחשב. log מציין לוגריתם טבעי, ובאינטגרלים לא מסוימים אין צורך בקבוע.</p>
+        </div>
+        <div class="tools"><button class="btn btn-line" type="button" data-toggle-all="qual-grid">הצגת כל התשובות</button></div>
+      </div>
+      <div class="problems" id="qual-grid"></div>
+    </div>
+  </section>
+
+  <section class="section section-alt" id="finals">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <h2>הגמר · 11 ביוני 2026</h2>
+          <p>תשעה מתמודדים, שלושה סבבי בתים, גמר ודו־קרב. כל אינטגרל נפתר על הלוח מול הקהל.</p>
+        </div>
+        <div class="tools"><button class="btn btn-line" type="button" data-toggle-all="finals-wrap">הצגת כל התשובות</button></div>
+      </div>
+      <div id="finals-wrap"></div>
+    </div>
+  </section>
+
+  <section class="section" id="slides">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <h2>מצגת הגמר</h2>
+          <p>המצגת שהוקרנה באולם לאורך הערב. אפשר לדפדף בחצים במקלדת.</p>
+        </div>
+        <a class="link-arrow" href="assets/docs/final-slides-2026.pdf">הורדת המצגת (PDF)</a>
+      </div>
+      <div class="viewer" id="viewer" data-count="26" tabindex="0" aria-label="מצגת הגמר">
+        <div class="viewer-stage"><img src="assets/img/slides/s-01.jpg" alt=""></div>
+        <div class="viewer-bar">
+          <button type="button" data-prev>הקודמת</button>
+          <span class="viewer-count" aria-live="polite">1 / 26</span>
+          <button type="button" data-next>הבאה</button>
+        </div>
+        <div class="thumbs"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section-alt" id="quiz-sec">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <h2>ניוטון או לייבניץ?</h2>
+          <p>חידון הקהל מהגמר, בזמן שהמתמודדים נחו בין השלבים. לכל שאלה בחרו את המתמטיקאי הנכון.</p>
+        </div>
+      </div>
+      <div class="quiz" id="quiz"></div>
+      <p class="quiz-score" id="quiz-score" aria-live="polite"></p>
+    </div>
+  </section>
+
+  <section class="section" id="photos">
+    <div class="wrap">
+      <div class="section-head"><div><h2>תמונות</h2><p>לחצו על תמונה כדי להגדיל אותה.</p></div></div>
+
+      <h3 class="ph-title">המוקדמות · 31 במאי ו־1 ביוני</h3>
+      <div class="ph-grid ph-qual">
+        <figure class="ph"><button type="button" class="ph-open" aria-label="הגדלת התמונה: סטודנטים פותרים את מבחן המוקדמות"><img src="assets/img/photos/qual-1.jpg" alt="סטודנטים פותרים את מבחן המוקדמות באולם אורנשטיין" loading="lazy"></button></figure>
+        <figure class="ph"><button type="button" class="ph-open" aria-label="הגדלת התמונה: סטודנטים פותרים את מבחן המוקדמות, מועד נוסף"><img src="assets/img/photos/qual-2.jpg" alt="סטודנטים פותרים את מבחן המוקדמות באולם שרייבר" loading="lazy"></button></figure>
+      </div>
+
+      <h3 class="ph-title">הגמר · 11 ביוני, אולם לב</h3>
+      <div class="ph-grid ph-final">
+        <figure class="ph lead"><button type="button" class="ph-open" aria-label="הגדלת התמונה: תשעת המשתתפים בגמר עומדים מול הלוחות"><img src="assets/img/photos/final-lineup.jpg" alt="תשעת המשתתפים בגמר עומדים מול הלוחות" loading="lazy"></button></figure>
+        <figure class="ph"><button type="button" class="ph-open" aria-label="הגדלת התמונה: שלושה מתמודדים פותרים על הלוח בשלב הבתים"><img src="assets/img/photos/final-round-1.jpg" alt="שלושה מתמודדים פותרים על הלוח בשלב הבתים" loading="lazy"></button></figure>
+        <figure class="ph"><button type="button" class="ph-open" aria-label="הגדלת התמונה: סבב נוסף בשלב הבתים, כל מתמודד מול לוח משלו"><img src="assets/img/photos/final-round-2.jpg" alt="סבב נוסף בשלב הבתים, כל מתמודד מול לוח משלו" loading="lazy"></button></figure>
+        <figure class="ph"><button type="button" class="ph-open" aria-label="הגדלת התמונה: הדו־קרב הסופי, שני מתמודדים מול הלוחות והקהל"><img src="assets/img/photos/final-duel.jpg" alt="הדו־קרב הסופי, שני מתמודדים מול הלוחות והקהל" loading="lazy"></button></figure>
+        <figure class="ph"><button type="button" class="ph-open" aria-label="הגדלת התמונה: מתמודדים כותבים פתרונות על הלוח בגמר"><img src="assets/img/photos/final-board.jpg" alt="מתמודדים כותבים פתרונות על הלוח בגמר" loading="lazy"></button></figure>
+        <figure class="ph wide"><button type="button" class="ph-open" aria-label="הגדלת התמונה: מתנדבים מהקהל בחידון ניוטון או לייבניץ"><img src="assets/img/photos/final-quiz.jpg" alt="מתנדבים מהקהל בחידון ניוטון או לייבניץ" loading="lazy"></button></figure>
+        <figure class="ph wide"><button type="button" class="ph-open" aria-label="הגדלת התמונה: מעטפות האינטגרלים הסגורות לפני תחילת הגמר"><img src="assets/img/photos/envelopes.jpg" alt="מעטפות האינטגרלים הסגורות לפני תחילת הגמר" loading="lazy"></button></figure>
+      </div>
+    </div>
+  </section>
+
+  <dialog class="lightbox" id="lightbox" aria-label="תמונה מוגדלת">
+    <img src="" alt="">
+    <button type="button" class="lb-close" aria-label="סגירה">✕</button>
+  </dialog>
+
+  <section class="section section-alt" id="downloads">
+    <div class="wrap">
+      <div class="section-head"><div><h2>קבצים להורדה</h2></div></div>
+      <div class="downloads">
+        <a class="dl" href="assets/docs/qualifying-exam-2026.pdf"><svg width="34" height="38" viewBox="0 0 60 68" aria-hidden="true"><path d="M30 2 57 17.5v33L30 66 3 50.5v-33z" fill="#f6c744"/><path d="M30 20v24m-10-9 10 10 10-10" fill="none" stroke="#2b2f33" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg><div><b>מבחן המוקדמות</b><span>PDF · 11 עמודים</span></div></a>
+        <a class="dl" href="assets/docs/final-slides-2026.pdf"><svg width="34" height="38" viewBox="0 0 60 68" aria-hidden="true"><path d="M30 2 57 17.5v33L30 66 3 50.5v-33z" fill="#f6c744"/><path d="M30 20v24m-10-9 10 10 10-10" fill="none" stroke="#2b2f33" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg><div><b>מצגת הגמר</b><span>PDF · 26 שקופיות</span></div></a>
+        <a class="dl" href="assets/docs/rules-2026.pdf"><svg width="34" height="38" viewBox="0 0 60 68" aria-hidden="true"><path d="M30 2 57 17.5v33L30 66 3 50.5v-33z" fill="#f6c744"/><path d="M30 20v24m-10-9 10 10 10-10" fill="none" stroke="#2b2f33" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg><div><b>תקנון הגמר</b><span>PDF · 3 עמודים</span></div></a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <img class="footer-logo" src="assets/img/faculty-he-light.png" alt="הפקולטה למדעים מדויקים ע״ש ריימונד ובברלי סאקלר, אוניברסיטת תל אביב" width="1016" height="192" loading="lazy">
+    <div class="footer-links"><a href="index.html#register">הרשמה</a><a href="archive-2026.html">מאגר 2026</a><a href="simulation.html">סימולציה</a></div>
+  </div>
+</footer>
+
+<script src="assets/vendor/katex/katex.min.js"></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/main.js"></script>
+</body>
+</html>

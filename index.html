@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Integration Bee · תחרות האינטגרלים של אוניברסיטת תל אביב</title>
+<meta name="description" content="תחרות האינטגרלים של הפקולטה למדעים מדויקים באוניברסיטת תל אביב: הרשמה, מבנה התחרות, אלופי 2026 ומאגר האינטגרלים מהשנים הקודמות.">
+<meta property="og:title" content="Integration Bee · אוניברסיטת תל אביב">
+<meta property="og:description" content="תחרות האינטגרלים של הפקולטה למדעים מדויקים">
+<meta property="og:image" content="assets/img/og.jpg">
+<link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/css/fonts.css">
+<link rel="stylesheet" href="assets/vendor/katex/katex.min.css">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="index.html" aria-label="Integration Bee · דף הבית">
+      <img class="brand-mark" src="assets/img/favicon.svg" alt="">
+      <span><span class="brand-name">INTEGRATION BEE</span><span class="brand-sub">אוניברסיטת תל אביב</span></span>
+    </a>
+    <button class="menu-btn" type="button" aria-expanded="false" aria-controls="nav">תפריט</button>
+    <nav class="nav" id="nav" aria-label="ניווט ראשי">
+      <a href="index.html#format">מבנה התחרות</a>
+      <a href="index.html#champions">אלופי 2026</a>
+      <a href="index.html#team">הצוות</a>
+      <a href="archive-2026.html">מאגר 2026</a>
+      <a href="simulation.html">סימולציה</a>
+      <a class="nav-cta" href="index.html#register">הרשמה</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="board hero">
+    <div class="wrap hero-grid">
+      <div>
+        <img class="hero-logo" src="assets/img/faculty-he-light.png" alt="הפקולטה למדעים מדויקים ע״ש ריימונד ובברלי סאקלר, אוניברסיטת תל אביב" width="1016" height="192">
+        <h1 class="hero-title" aria-label="Integration Bee"><span>INTEGRATION</span><span>BEE <span class="yr" data-year>2027</span></span></h1>
+        <p class="hero-he">תחרות האינטגרלים של אוניברסיטת תל אביב</p>
+        <div class="hero-actions">
+          <a class="btn btn-honey" href="#register">פרטים והרשמה</a>
+          <a class="btn btn-ghost" href="archive-2026.html">למאגר האינטגרלים</a>
+        </div>
+      </div>
+      <div class="chalk-problem">
+        <div class="eq" data-tex="\int_0^{\pi}\cos^2\!\left(\tfrac{\pi}{2}\cos^2\!\left(\tfrac{\pi}{2}\cos^2 x\right)\right)dx"></div>
+        <p class="chalk-q" dir="ltr">HOW FAST CAN YOU SOLVE THIS?</p>
+        <div class="chalk-foot">
+          <button class="reveal-btn" type="button" data-reveal="hero-ans" aria-expanded="false">הצגת התשובה</button>
+        </div>
+        <div class="chalk-answer" id="hero-ans" hidden><span data-tex="\dfrac{\pi}{2}"></span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="facts" aria-label="התחרות במספרים, 2026">
+    <div class="wrap">
+      <div class="fact"><b dir="ltr">100</b><span>נרשמו לתחרות</span></div>
+      <div class="fact"><b dir="ltr">~50</b><span>ניגשו למוקדמות</span></div>
+      <div class="fact"><b>20</b><span>אינטגרלים ב־30 דקות</span></div>
+      <div class="fact"><b>9</b><span>עלו לגמר</span></div>
+      <div class="fact"><b dir="ltr">2,000<span class="cur">₪</span></b><span>בפרסים</span></div>
+    </div>
+  </section>
+
+  <section class="section" id="register">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <h2>תחרות <span class="latin">2027</span></h2>
+          <p>התחרות פתוחה לכל הסטודנטיות והסטודנטים לתואר ראשון בפקולטה למדעים מדויקים.</p>
+        </div>
+      </div>
+      <div class="reg">
+        <div class="reg-card">
+          <h3>הרשמה</h3>
+          <p class="who">מועדי המוקדמות והגמר יפורסמו כאן עם פתיחת ההרשמה.</p>
+          <ul class="reg-dates" id="reg-dates"></ul>
+          <a class="btn btn-honey" id="reg-btn" href="#">להרשמה</a>
+          <p class="reg-note" id="reg-contact" hidden></p>
+        </div>
+        <div id="format">
+          <ol class="steps">
+            <li><div><h3>מוקדמות</h3><p>מבחן כתוב: 20 אינטגרלים ב־30 דקות, בלי מחשבון. תשעת ההישגים הגבוהים עולים לגמר.</p></div></li>
+            <li><div><h3>שלב הבתים</h3><p>שלושה סבבים של שלושה מתמודדים. בכל סבב שלושה אינטגרלים, עד 3 דקות לכל אחד, פותרים על הלוח מול הקהל. מכל סבב עולה אחד.</p></div></li>
+            <li><div><h3>הגמר</h3><p>שלושת העולים פותרים אינטגרל אחד. שני הפתרונות הנכונים הראשונים עולים לדו־קרב.</p></div></li>
+            <li><div><h3>דו־קרב סופי</h3><p>שלושה אינטגרלים, עד 5 דקות לכל אחד. מי שצובר יותר נקודות זוכה בתואר אלוף תחרות האינטגרלים.</p></div></li>
+          </ol>
+          <p style="margin-top:20px"><a class="link-arrow" href="assets/docs/rules-2026.pdf">התקנון המלא (PDF)</a></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section-alt" id="champions">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <h2>אלופי <span class="latin">2026</span></h2>
+          <p>הגמר התקיים ב־11 ביוני 2026 באולם לב. שלושת הזוכים קיבלו תעודות הצטיינות ותווי קנייה.</p>
+        </div>
+        <a class="link-arrow" href="archive-2026.html#finals">האינטגרלים מהגמר</a>
+      </div>
+      <div class="podium">
+        <article class="champ second">
+          <figure style="--pos: 18% 30%"><img src="assets/img/photos/second-place.jpg" alt="רות קוזלובסקי מקבלת את תעודת המקום השני" loading="lazy"></figure>
+          <div class="champ-body">
+            <span class="champ-place"><i></i>מקום שני</span>
+            <h3>רות קוזלובסקי</h3>
+            <p class="school">בית הספר לפיזיקה ואסטרונומיה</p>
+          </div>
+        </article>
+        <article class="champ first">
+          <figure style="--pos: 22% 30%"><img src="assets/img/photos/first-place.jpg" alt="עומר ברייטל מקבל את תעודת המקום הראשון"></figure>
+          <div class="champ-body">
+            <span class="champ-place"><i></i>מקום ראשון</span>
+            <h3>עומר ברייטל</h3>
+            <p class="school">פיזיקה והנדסת חשמל</p>
+            <span class="title">אלוף תחרות האינטגרלים 2026</span>
+          </div>
+        </article>
+        <article class="champ third">
+          <figure style="--pos: 22% 30%"><img src="assets/img/photos/third-place.jpg" alt="עדן מזור עם תעודת המקום השלישי" loading="lazy"></figure>
+          <div class="champ-body">
+            <span class="champ-place"><i></i>מקום שלישי</span>
+            <h3>עדן מזור</h3>
+            <p class="school">בית הספר למתמטיקה</p>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <h2>מאגר האינטגרלים</h2>
+          <p>כל האינטגרלים מ־2026, עם תשובות. הדרך הטובה ביותר להתכונן למוקדמות.</p>
+        </div>
+      </div>
+      <div class="teaser">
+        <a href="archive-2026.html#qualifying">
+          <div class="eq" data-tex="\int_0^{\pi/2}\log(\sin x)\,dx"></div>
+          <h3>מבחן המוקדמות</h3>
+          <p>20 אינטגרלים, 30 דקות. המבחן המלא מ־2026.</p>
+        </a>
+        <a href="archive-2026.html#finals">
+          <div class="eq" data-tex="\int_0^{\infty}\frac{\{x\}}{(x+1)(x+2)}\,dx"></div>
+          <h3>הגמר והדו־קרב</h3>
+          <p>13 האינטגרלים שנפתרו על הלוח, סבב אחר סבב.</p>
+        </a>
+        <a href="simulation.html">
+          <div class="eq" data-tex="\int \frac{x^2+1}{x^4+1}\,dx"></div>
+          <h3>סימולציה</h3>
+          <p>מבחן מוקדמות מלא על שעון, או אינטגרל אקראי מהגמר עם 3 דקות.</p>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section-alt" id="team">
+    <div class="wrap">
+      <div class="team-block">
+        <h2>שופטים <span class="latin">2026</span></h2>
+        <div class="team">
+          <div class="member"><h3>פרופ׳ מיכאיל סודין</h3></div>
+          <div class="member"><h3>פרופ׳ אלון נשרי</h3></div>
+          <div class="member"><h3>פרופ׳ לב בוחובסקי</h3></div>
+        </div>
+      </div>
+      <div class="team-block">
+        <h2>מארגני התחרות</h2>
+        <div class="team">
+          <div class="member"><h3>פרופ׳ רון ליפשיץ</h3><p>סגן הדקאנית לענייני הוראה</p></div>
+          <div class="member"><h3>ד״ר בת שחר דורפמן</h3><p>מובילת LEAD</p></div>
+          <div class="member"><h3>פרופ׳ לב בוחובסקי</h3><p>אחראי אקדמי</p></div>
+          <div class="member"><h3>קרן מור ווקנין</h3></div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <img class="footer-logo" src="assets/img/faculty-he-light.png" alt="הפקולטה למדעים מדויקים ע״ש ריימונד ובברלי סאקלר, אוניברסיטת תל אביב" width="1016" height="192" loading="lazy">
+    <div class="footer-links"><a href="index.html#register">הרשמה</a><a href="archive-2026.html">מאגר 2026</a><a href="simulation.html">סימולציה</a></div>
+  </div>
+</footer>
+
+<script src="assets/vendor/katex/katex.min.js"></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/main.js"></script>
+</body>
+</html>

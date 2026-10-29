@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>סימולציה · Integration Bee אוניברסיטת תל אביב</title>
+<meta name="description" content="סימולציה של תחרות האינטגרלים: מבחן מוקדמות מלא על שעון, או אינטגרל אקראי מהגמר.">
+<meta property="og:title" content="Integration Bee · אוניברסיטת תל אביב">
+<meta property="og:description" content="תחרות האינטגרלים של הפקולטה למדעים מדויקים">
+<meta property="og:image" content="assets/img/og.jpg">
+<link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/css/fonts.css">
+<link rel="stylesheet" href="assets/vendor/katex/katex.min.css">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="index.html" aria-label="Integration Bee · דף הבית">
+      <img class="brand-mark" src="assets/img/favicon.svg" alt="">
+      <span><span class="brand-name">INTEGRATION BEE</span><span class="brand-sub">אוניברסיטת תל אביב</span></span>
+    </a>
+    <button class="menu-btn" type="button" aria-expanded="false" aria-controls="nav">תפריט</button>
+    <nav class="nav" id="nav" aria-label="ניווט ראשי">
+      <a href="index.html#format">מבנה התחרות</a>
+      <a href="index.html#champions">אלופי 2026</a>
+      <a href="index.html#team">הצוות</a>
+      <a href="archive-2026.html">מאגר 2026</a>
+      <a href="simulation.html" aria-current="page">סימולציה</a>
+      <a class="nav-cta" href="index.html#register">הרשמה</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="board sim-head">
+    <div class="wrap">
+      <h1>סימולציה</h1>
+      <div class="seg seg-lg" id="sim-mode" role="group" aria-label="סוג הסימולציה">
+        <button type="button" data-mode="qual" aria-pressed="true">מוקדמות</button>
+        <button type="button" data-mode="final" aria-pressed="false">גמר</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- מוקדמות: 20 אינטגרלים, 20 דקות -->
+  <section class="sim-qual" id="sim-qual">
+    <div class="sim-bar">
+      <div class="wrap">
+        <div class="timer timer-sm" id="qual-timer" aria-live="off">20:00</div>
+        <div class="sim-status" id="qual-status">20 אינטגרלים מתוך מבחן המוקדמות 2026. השעון רץ על כולם יחד.</div>
+        <div class="sim-actions">
+          <button class="btn btn-honey" id="qual-start" type="button">התחלת המבחן</button>
+          <button class="btn btn-line" id="qual-end" type="button" hidden>סיום והצגת תשובות</button>
+        </div>
+      </div>
+    </div>
+    <div class="wrap section-tight">
+      <div class="problems" id="qual-sheet" data-locked="true"></div>
+      <p class="qual-score" id="qual-score" aria-live="polite"></p>
+    </div>
+  </section>
+
+  <!-- גמר: אינטגרל אחד על הלוח -->
+  <section class="board practice" id="sim-final" hidden>
+    <div class="wrap arena" id="arena">
+      <div class="arena-meta"><span id="arena-src">אינטגרל אקראי מהגמר · 3 דקות, 5 דקות לאינטגרלי הדו־קרב</span></div>
+      <div class="timer" id="timer" aria-live="off">3:00</div>
+      <div class="arena-board">
+        <div>
+          <div class="eq" id="arena-eq"><span style="color:#c3c8cc;font-size:1.15rem">לחצו על ״התחלה״ כדי לקבל אינטגרל מהגמר.</span></div>
+          <p class="note" id="arena-note"></p>
+        </div>
+      </div>
+      <div class="arena-answer" id="arena-answer" aria-live="polite"></div>
+      <div class="arena-actions">
+        <button class="btn btn-honey" id="arena-start" type="button">התחלה</button>
+        <button class="btn btn-ghost" id="arena-show" type="button" disabled>הצגת התשובה</button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <img class="footer-logo" src="assets/img/faculty-he-light.png" alt="הפקולטה למדעים מדויקים ע״ש ריימונד ובברלי סאקלר, אוניברסיטת תל אביב" width="1016" height="192" loading="lazy">
+    <div class="footer-links"><a href="index.html#register">הרשמה</a><a href="archive-2026.html">מאגר 2026</a><a href="simulation.html">סימולציה</a></div>
+  </div>
+</footer>
+
+<script src="assets/vendor/katex/katex.min.js"></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/main.js"></script>
+</body>
+</html>
