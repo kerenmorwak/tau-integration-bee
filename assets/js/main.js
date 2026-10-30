@@ -188,7 +188,7 @@
   // qualifying: whole sheet, one clock
   const sheet = $("#qual-sheet");
   if (sheet) {
-    const TOTAL = 20 * 60;
+    const TOTAL = 30 * 60;
     let left = TOTAL, t = null, finished = false;
     const timerEl = $("#qual-timer"), startBtn = $("#qual-start"), endBtn = $("#qual-end"), status = $("#qual-status"), score = $("#qual-score");
     DATA.qualifying.forEach((p, i) => {
