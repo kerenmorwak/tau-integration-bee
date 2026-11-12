@@ -1,0 +1,346 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#2b2f33">
+<title>לוח בקרה · האחוזון העליון</title>
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="live.css">
+<style>
+/* Control panel: one big next-step button on top, live status, then the question editor. Works on a phone. */
+body { padding: max(14px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) 40px max(16px, env(safe-area-inset-left)); }
+.wrap { max-width: 860px; margin: 0 auto; display: grid; gap: 16px; }
+h1 { font-family: var(--f-display); font-weight: 400; font-size: 1.7rem; margin: 0; color: var(--honey); }
+h2 { font-family: var(--f-display); font-weight: 400; font-size: 1.3rem; margin: 0 0 10px; }
+.bar { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.bar .who { color: var(--mist); font-size: .9rem; }
+.panel { background: var(--board); border: 2px solid rgba(248,248,245,.1); border-radius: 12px; padding: 16px; }
+.status { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.stat { background: var(--slate-2); border-radius: 8px; padding: 8px 12px; }
+.stat span { color: var(--mist); font-size: .85rem; display: block; }
+.stat b { font-family: var(--f-latin); font-size: 2rem; line-height: 1; letter-spacing: .02em; font-variant-numeric: tabular-nums; }
+.now { margin: 14px 0; }
+.now .q { font-family: var(--f-display); font-size: 1.2rem; line-height: 1.3; }
+.now .meta { color: var(--mist); font-size: .9rem; }
+.now .ans { color: var(--ok); font-weight: 700; margin-top: 4px; }
+.actions { display: grid; gap: 10px; }
+.actions .main { font-size: 1.3rem; padding: 18px; }
+.actions .row { display: flex; gap: 10px; flex-wrap: wrap; }
+.actions .row .btn { flex: 1 1 160px; }
+.links { display: flex; gap: 16px; flex-wrap: wrap; font-size: .95rem; }
+.links a { color: var(--honey); }
+.qlist { display: grid; gap: 12px; counter-reset: q; }
+.qitem { background: var(--slate-2); border: 2px solid var(--line); border-radius: 10px; padding: 12px; display: grid; gap: 8px; }
+.qitem.reserve { border-style: dashed; }
+.qhead { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.qhead .num { font-family: var(--f-latin); font-size: 1.4rem; color: var(--honey); min-width: 3ch; }
+.qhead label { display: flex; align-items: center; gap: 6px; color: var(--mist); font-size: .9rem; }
+.qhead input[type=number] { width: 70px; }
+.qhead .tools { margin-inline-start: auto; display: flex; gap: 4px; }
+.qhead .tools button { background: transparent; border: 1px solid var(--line); border-radius: 6px; padding: 2px 10px; cursor: pointer; color: var(--mist); }
+input[type=text], input[type=number], textarea { background: var(--board); border: 1px solid var(--line); border-radius: 6px; padding: 8px 10px; width: 100%; }
+textarea { resize: vertical; min-height: 44px; }
+.optrow { display: grid; grid-template-columns: auto auto 1fr; gap: 8px; align-items: center; }
+.optrow .k { font-family: var(--f-latin); color: var(--honey); font-size: 1.2rem; width: 1.2em; text-align: center; }
+.optrow input[type=radio] { width: 20px; height: 20px; accent-color: var(--ok); }
+.hint { color: var(--mist); font-size: .88rem; }
+.saved { color: var(--ok); font-weight: 700; }
+.signin { text-align: center; padding: 40px 0; }
+@media (max-width: 560px) { .status { grid-template-columns: 1fr 1fr; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="bar"><h1>לוח בקרה · האחוזון העליון</h1><span class="who" id="who"></span></div>
+
+  <section class="panel signin" id="signin" hidden>
+    <p>לוח הבקרה פתוח רק למארגנים.</p>
+    <button class="btn btn-honey" id="signinBtn" type="button">התחברות עם Google</button>
+    <p class="err" id="signinErr"></p>
+  </section>
+
+  <div id="admin" hidden>
+    <section class="panel">
+      <div class="status">
+        <div class="stat"><span>שלב</span><b id="sPhase">—</b></div>
+        <div class="stat"><span>נרשמו</span><b id="sJoined">0</b></div>
+        <div class="stat"><span>במשחק</span><b id="sAlive">0</b></div>
+        <div class="stat"><span id="sAnsLbl">ענו</span><b id="sAns">—</b></div>
+      </div>
+      <div class="now" id="now"></div>
+      <div class="actions">
+        <button class="btn btn-honey main" id="mainBtn" type="button">משחק חדש</button>
+        <div class="row">
+          <button class="btn btn-ghost" id="reserveBtn" type="button" hidden>שאלת חיזוק</button>
+          <button class="btn btn-ghost" id="endBtn" type="button" hidden>סיום עכשיו והכרזה</button>
+          <button class="btn btn-danger" id="newBtn" type="button" hidden>משחק חדש</button>
+        </div>
+        <div class="row" id="mockRow" hidden>
+          <button class="btn btn-ghost" id="bots" type="button">חזרה: 100 משתתפים מדומים מצטרפים</button>
+          <button class="btn btn-ghost" id="botsReset" type="button">חזרה: איפוס הכול</button>
+        </div>
+        <p class="err" id="actErr"></p>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="links">
+        <a id="hostLink" href="host.html" target="_blank" rel="noopener">מסך ההקרנה</a>
+        <a id="playLink" href="play.html" target="_blank" rel="noopener">עמוד המשתתפים</a>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="bar"><h2>השאלות</h2><span class="hint">השאלות והתשובות נשמרות רק במסד הנתונים, ורק מארגנים יכולים לראות אותן.</span></div>
+      <p class="hint">הסדר כאן הוא סדר השאלות במשחק. שאלת חיזוק לא מופיעה בסולם, ומפעילים אותה בכפתור "שאלת חיזוק" כשנשארים יותר מדי משתתפים. שינויים נכנסים למשחק הבא שתפתחו.</p>
+      <div class="qlist" id="qlist"></div>
+      <div class="row" style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
+        <button class="btn btn-ghost" id="addQ" type="button">הוספת שאלה</button>
+        <button class="btn btn-honey" id="saveQ" type="button">שמירת השאלות</button>
+        <span id="saveMsg" class="hint"></span>
+      </div>
+    </section>
+  </div>
+</div>
+
+<script type="module">
+let cfgSeen = false;
+import db, { MOCK, link } from "./db.js";
+import { settle, rankWinners, LETTERS, SAMPLE_QUESTIONS, fmtSec } from "./game.js";
+const $ = id => document.getElementById(id);
+if (MOCK) { document.body.insertAdjacentHTML("beforeend", '<span class="mock-tag">חזרה · נתונים מדומים</span>'); $("mockRow").hidden = false; }
+$("hostLink").href = link("host.html"); $("playLink").href = link("play.html");
+
+let questions = [], gid = null, game = null, players = [], state = null, unsub = [], ansUnsub = null, answered = 0, busy = false, tick = null;
+const PHASE = { lobby: "הצטרפות", question: "שאלה", reveal: "חשיפה", end: "סוף" };
+
+db.onAdmin(async (u, error) => {
+  $("signin").hidden = !!u; $("admin").hidden = !u;
+  $("who").textContent = u ? u.email : "";
+  $("signinErr").textContent = error ? "אין לחשבון הזה הרשאת ניהול. התחברו עם חשבון המארגנת." : "";
+  if (!u) return;
+  try {
+    questions = (await db.loadQuestions()) || (MOCK ? structuredClone(SAMPLE_QUESTIONS) : []);
+    state = await db.loadState();
+  } catch (e) { $("actErr").textContent = "אין הרשאה לקרוא את השאלות. ודאו שהאימייל שלכם רשום בכללי האבטחה (ראו README)."; return; }
+  renderQuestions(); watch();
+});
+$("signinBtn").onclick = () => db.adminSignIn().catch(e => ($("signinErr").textContent = "ההתחברות נכשלה: " + (e.code || e.message)));
+
+function watch() {
+  db.watchConfig(c => {
+    const next = c?.gameId || null;
+    if (next === gid && cfgSeen) { if (!gid) render(); return; } cfgSeen = true;
+    unsub.forEach(f => f()); unsub = []; gid = next; game = null; players = [];
+    if (gid) {
+      unsub.push(db.watchGame(gid, g => { game = g; render(); }));
+      unsub.push(db.watchPlayers(gid, p => { players = p; render(); }));
+    }
+    render();
+  });
+}
+
+const mains = () => (state?.questions || []).filter(q => !q.reserve);
+const reserves = () => (state?.questions || []).filter(q => q.reserve);
+const alive = () => players.filter(p => p.alive);
+
+function watchAns() {
+  const qn = game?.phase === "question" ? game.qn : null;
+  if (ansUnsub && ansUnsub.qn === qn) return;
+  ansUnsub && ansUnsub(); ansUnsub = null; answered = 0;
+  if (qn != null) { ansUnsub = db.watchAnswerCount(gid, qn, n => { answered = n; $("sAns").textContent = n; }); ansUnsub.qn = qn; }
+}
+
+function render() {
+  watchAns();
+  const ph = game?.phase;
+  $("sPhase").textContent = ph ? PHASE[ph] : "—";
+  $("sJoined").textContent = players.length;
+  $("sAlive").textContent = ph === "lobby" ? players.length : alive().length;
+  $("sAnsLbl").textContent = "ענו";
+  if (ph !== "question") $("sAns").textContent = "—";
+  const M = mains(), R = reserves();
+  const nextMain = M[game?.mainIdx ?? 0];
+  const main = $("mainBtn");
+  $("reserveBtn").hidden = !(ph === "reveal" && !game.final && (game.resIdx ?? 0) < R.length) && !(ph === "lobby" && false);
+  $("endBtn").hidden = !(ph === "reveal" && !game.final) && ph !== "question";
+  $("newBtn").hidden = !ph || ph === "end";
+  clearInterval(tick);
+  const now = $("now"); now.innerHTML = "";
+
+  if (!ph || ph === "end") { main.textContent = "משחק חדש (פתיחת ההצטרפות)"; main.onclick = newGame; if (ph === "end") showWinners(); return; }
+  if (ph === "lobby") {
+    main.textContent = nextMain ? `שאלה ראשונה · ${nextMain.pct}%` : "אין שאלות במשחק";
+    main.disabled = !nextMain || busy; main.onclick = () => openQ(false);
+    now.innerHTML = `<div class="meta">ההצטרפות פתוחה. כשהאולם מלא, פותחים את השאלה הראשונה.</div>`;
+    return;
+  }
+  const cur = state?.current;
+  now.innerHTML = `<div class="meta"></div><div class="q"></div><div class="ans"></div>`;
+  now.querySelector(".meta").textContent = game.isReserve ? "שאלת חיזוק" : `שאלה ${game.ladderPos + 1} מתוך ${game.ladder.length} · ${game.pct}%`;
+  now.querySelector(".q").textContent = game.q;
+  if (cur && cur.qn === game.qn) now.querySelector(".ans").textContent = `תשובה נכונה: ${LETTERS[cur.answer]} · ${game.opts[cur.answer]}`;
+
+  if (ph === "question") {
+    main.disabled = busy; main.onclick = reveal;
+    const step = () => {
+      const left = Math.max(0, Math.ceil(game.seconds - (Date.now() - game.openedAt) / 1000));
+      main.textContent = left > 0 ? `חשיפת התשובה (עוד ${left} שנ׳)` : "חשיפת התשובה";
+      if (left <= 0) clearInterval(tick);
+    };
+    step(); tick = setInterval(step, 250);
+    $("sAns").textContent = answered;
+    return;
+  }
+  if (ph === "reveal") {
+    const r = document.createElement("div"); r.className = "meta";
+    r.textContent = `${game.eliminated} נפסלו · ${game.remaining} ממשיכים`; now.appendChild(r);
+    if (game.final) { main.textContent = "הכרזה על הזוכים"; main.disabled = busy; main.onclick = () => act(() => db.patchGame(gid, { phase: "end" })); }
+    else { main.textContent = nextMain ? `השאלה הבאה · ${nextMain.pct}%` : "הכרזה על הזוכים"; main.disabled = busy; main.onclick = () => nextMain ? openQ(false) : endNow(); }
+  }
+}
+
+function showWinners() {
+  const w = game.winners || [];
+  $("now").innerHTML = `<div class="meta">${w.length ? "הזוכים:" : "אין זוכים"}</div>` + w.map((x, i) => `<div>${i + 1}. <span></span> <span class="hint">${fmtSec(x.ms)}</span></div>`).join("");
+  $("now").querySelectorAll("div > span:first-of-type").forEach((s, i) => (s.textContent = w[i].name));
+}
+
+async function act(fn) {
+  if (busy) return; busy = true; $("actErr").textContent = ""; render();
+  try { await fn(); } catch (e) { console.error(e); $("actErr").textContent = "הפעולה נכשלה: " + (e.code || e.message); }
+  busy = false; render();
+}
+
+const newGame = () => act(async () => {
+  const qs = questions.map(cleanQuestion);
+  if (qs.some(q => !valid(q))) throw new Error("בדקו שלכל שאלה יש לפחות שתי אפשרויות, תשובה נכונה וזמן של 3 עד 60 שניות.");
+  if (!qs.filter(q => !q.reserve).length) throw new Error("צריך לפחות שאלה אחת שאינה שאלת חיזוק.");
+  state = { questions: qs, current: null };
+  await db.saveState(state);
+  await db.newGame({ phase: "lobby", qn: -1, ladder: qs.filter(q => !q.reserve).map(q => q.pct), ladderPos: -1, mainIdx: 0, resIdx: 0, passed: {} });
+});
+
+function openQ(useReserve) {
+  return act(async () => {
+    const M = mains(), R = reserves();
+    const q = useReserve ? R[game.resIdx ?? 0] : M[game.mainIdx ?? 0];
+    if (!q) throw new Error("אין עוד שאלות.");
+    const qn = (game.qn ?? -1) + 1;
+    state.current = { qn, answer: q.answer, reserve: !!useReserve };
+    await db.saveState(state);
+    await db.patchGame(gid, {
+      phase: "question", acceptingAnswers: true, qn, q: q.q, opts: q.opts, pct: q.pct ?? 0, seconds: q.seconds || 10, openedAt: db.SERVER_TIME,
+      isReserve: !!useReserve, ladderPos: useReserve ? game.ladderPos : game.mainIdx,
+      mainIdx: useReserve ? game.mainIdx : game.mainIdx + 1, resIdx: useReserve ? game.resIdx + 1 : game.resIdx,
+      aliveBefore: alive().length, answer: null, counts: null, remaining: null, eliminated: null, final: false, winners: null
+    });
+    if (MOCK) {
+      const acc = useReserve ? .5 : ({ 90: .95, 70: .85, 50: .75, 30: .65, 10: .55, 5: .45, 1: .35 }[q.pct] ?? .6);
+      setTimeout(() => db.mock.botsAnswer(gid, acc, q.answer), 1200);
+    }
+  });
+}
+$("reserveBtn").onclick = () => openQ(true);
+
+const reveal = () => act(async () => {
+  const cur = state.current;
+  if (!cur || cur.qn !== game.qn) throw new Error("לא נמצאה התשובה הנכונה לשאלה הזו. רעננו את הדף ונסו שוב.");
+  await db.patchGame(gid, { acceptingAnswers: false });
+  const before = alive();
+  const answers = await db.getAnswers(gid, game.qn);
+  const r = settle({ alive: before, answers, correct: cur.answer, openedAt: game.openedAt, nOpts: game.opts.length });
+  await db.updatePlayers(gid, [
+    ...r.out.map(p => ({ id: p.id, patch: { alive: false, outQ: game.qn } })),
+    ...r.stay.map(p => ({ id: p.id, patch: { lastMs: p.ms, lastQ: game.qn } }))
+  ]);
+  const lastMain = !game.isReserve && game.mainIdx >= mains().length;
+  const final = r.stay.length === 0 || lastMain;
+  const passed = { ...(game.passed || {}) };
+  if (!game.isReserve) passed[game.ladderPos] = r.stay.length;
+  await db.patchGame(gid, {
+    phase: "reveal", answer: cur.answer, counts: r.counts, remaining: r.stay.length, eliminated: r.out.length,
+    final, passed, winners: final ? rankWinners({ stay: r.stay, alive: before }).slice(0, 5) : null
+  });
+});
+
+const endNow = () => act(async () => {
+  const winners = rankWinners({ stay: [], alive: alive() }).slice(0, 5);
+  await db.patchGame(gid, { phase: "end", final: true, winners });
+});
+$("endBtn").onclick = () => {
+  if ($("endBtn").dataset.confirm) { delete $("endBtn").dataset.confirm; $("endBtn").textContent = "סיום עכשיו והכרזה"; endNow(); return; }
+  $("endBtn").dataset.confirm = 1; $("endBtn").textContent = "ללחוץ שוב לאישור";
+  setTimeout(() => { delete $("endBtn").dataset.confirm; $("endBtn").textContent = "סיום עכשיו והכרזה"; }, 4000);
+};
+$("newBtn").onclick = () => {
+  if ($("newBtn").dataset.confirm) { delete $("newBtn").dataset.confirm; $("newBtn").textContent = "משחק חדש"; newGame(); return; }
+  $("newBtn").dataset.confirm = 1; $("newBtn").textContent = "המשחק הנוכחי יימחק מהמסך. ללחוץ שוב לאישור";
+  setTimeout(() => { delete $("newBtn").dataset.confirm; $("newBtn").textContent = "משחק חדש"; }, 4000);
+};
+if (MOCK) {
+  $("bots").onclick = () => gid && game?.phase === "lobby" ? db.mock.addBots(gid, 100) : ($("actErr").textContent = "קודם פותחים משחק חדש.");
+  $("botsReset").onclick = () => { db.mock.reset(); location.reload(); };
+}
+
+// ---------- question editor ----------
+const valid = q => q.q.trim() && q.opts.length >= 2 && q.opts.length <= 4 && q.opts.every(o => o.trim())
+  && Number.isInteger(q.answer) && q.opts[q.answer]?.trim() && Number.isInteger(q.seconds) && q.seconds >= 3 && q.seconds <= 60
+  && Number.isFinite(q.pct) && q.pct >= 0 && q.pct <= 100;
+function cleanQuestion(q) {
+  const entries = q.opts.map((o, i) => ({ text: (o || "").trim(), i })).filter(o => o.text);
+  return { ...q, q: q.q.trim(), opts: entries.map(o => o.text), answer: entries.findIndex(o => o.i === q.answer),
+    seconds: Number(q.seconds), pct: q.reserve ? 0 : Number(q.pct) };
+}
+function renderQuestions() {
+  const box = $("qlist"); box.innerHTML = "";
+  let n = 0;
+  questions.forEach((q, i) => {
+    const el = document.createElement("div");
+    el.className = "qitem" + (q.reserve ? " reserve" : "");
+    const label = q.reserve ? "+" : String(++n);
+    el.innerHTML = `
+      <div class="qhead"><span class="num">${label}</span>
+        <label>אחוז <input type="number" min="0" max="100" data-f="pct" ${q.reserve ? "disabled" : ""}></label>
+        <label>שניות <input type="number" min="3" max="60" data-f="seconds"></label>
+        <label><input type="checkbox" data-f="reserve"> שאלת חיזוק</label>
+        <span class="tools"><button type="button" data-a="up" aria-label="למעלה">↑</button><button type="button" data-a="down" aria-label="למטה">↓</button><button type="button" data-a="del" aria-label="מחיקה">✕</button></span>
+      </div>
+      <textarea data-f="q" rows="2" aria-label="השאלה"></textarea>
+      ${[0, 1, 2, 3].map(j => `<div class="optrow"><input type="radio" name="ans${i}" value="${j}" aria-label="תשובה נכונה ${LETTERS[j]}"><span class="k">${LETTERS[j]}</span><input type="text" data-o="${j}" placeholder="${j < 2 ? "אפשרות" : "אפשרות (לא חובה)"}"></div>`).join("")}`;
+    el.querySelector('[data-f="pct"]').value = q.pct ?? "";
+    el.querySelector('[data-f="seconds"]').value = q.seconds ?? 10;
+    el.querySelector('[data-f="reserve"]').checked = !!q.reserve;
+    el.querySelector('[data-f="q"]').value = q.q;
+    el.querySelectorAll("[data-o]").forEach(inp => (inp.value = q.opts[+inp.dataset.o] || ""));
+    el.querySelector(`input[type=radio][value="${q.answer}"]`).checked = true;
+    el.addEventListener("input", e => {
+      const t = e.target;
+      if (t.dataset.f === "pct") q.pct = +t.value; else if (t.dataset.f === "seconds") q.seconds = +t.value;
+      else if (t.dataset.f === "q") q.q = t.value; else if (t.dataset.o != null) { q.opts[+t.dataset.o] = t.value; }
+      else if (t.type === "radio") q.answer = +t.value;
+      $("saveMsg").textContent = "יש שינויים שלא נשמרו"; $("saveMsg").className = "hint";
+    });
+    el.querySelector('[data-f="reserve"]').addEventListener("change", e => { q.reserve = e.target.checked; renderQuestions(); $("saveMsg").textContent = "יש שינויים שלא נשמרו"; });
+    el.querySelector(".tools").addEventListener("click", e => {
+      const a = e.target.dataset.a; if (!a) return;
+      if (a === "del") questions.splice(i, 1);
+      if (a === "up" && i > 0) [questions[i - 1], questions[i]] = [questions[i], questions[i - 1]];
+      if (a === "down" && i < questions.length - 1) [questions[i + 1], questions[i]] = [questions[i], questions[i + 1]];
+      renderQuestions(); $("saveMsg").textContent = "יש שינויים שלא נשמרו";
+    });
+    box.appendChild(el);
+  });
+}
+$("addQ").onclick = () => { questions.push({ pct: 50, seconds: 10, q: "", opts: ["", "", "", ""], answer: 0 }); renderQuestions(); };
+$("saveQ").onclick = async () => {
+  const clean = questions.map(cleanQuestion);
+  const bad = clean.findIndex(q => !valid(q));
+  if (bad >= 0) { $("saveMsg").textContent = `בשאלה ${bad + 1} חסר טקסט, או פחות משתי אפשרויות, או שהתשובה הנכונה ריקה.`; $("saveMsg").className = "err"; return; }
+  try { await db.saveQuestions(clean); questions = clean; renderQuestions(); $("saveMsg").textContent = "נשמר"; $("saveMsg").className = "saved"; }
+  catch (e) { $("saveMsg").textContent = "השמירה נכשלה: " + (e.code || e.message); $("saveMsg").className = "err"; }
+};
+</script>
+</body>
+</html>

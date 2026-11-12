@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#2b2f33">
+<title>האחוזון העליון · Integration Bee</title>
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="live.css">
+<style>
+/* Phone: one full-screen state at a time. The background colour is the signal the hall sees. */
+body { min-height: 100%; display: flex; flex-direction: column; transition: background .35s, color .35s; padding: max(16px, env(safe-area-inset-top)) max(18px, env(safe-area-inset-right)) max(18px, env(safe-area-inset-bottom)) max(18px, env(safe-area-inset-left)); }
+body.lit { background: var(--honey); color: var(--slate); }
+body.out { background: var(--out-bg); color: #f6c9bf; }
+header { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; font-weight: 700; }
+header .brand { font-family: var(--f-latin); font-size: 1.5rem; letter-spacing: .03em; direction: ltr; }
+header .me { opacity: .8; font-size: .95rem; }
+main { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 16px; text-align: center; padding: 12px 0; }
+h1 { font-family: var(--f-display); font-weight: 400; font-size: clamp(2rem, 9vw, 2.8rem); line-height: 1.1; margin: 0; text-wrap: balance; }
+p { margin: 0; font-size: 1.1rem; }
+.sub { opacity: .8; }
+form { display: grid; gap: 12px; text-align: right; }
+label { font-weight: 700; }
+input[type=text] { width: 100%; font-size: 1.3rem; padding: 14px 16px; border-radius: 10px; border: 2px solid var(--line); background: var(--board); }
+input[type=text]:focus { border-color: var(--honey); outline: none; }
+.big { width: 100%; font-size: 1.25rem; padding: 16px; }
+.q { font-family: var(--f-display); font-size: clamp(1.3rem, 6vw, 1.8rem); line-height: 1.25; text-wrap: balance; }
+.pct { font-family: var(--f-latin); color: var(--honey); font-size: 1.4rem; letter-spacing: .03em; direction: ltr; }
+.opts { display: grid; gap: 10px; }
+.opts button { display: flex; align-items: center; gap: 14px; text-align: right; width: 100%; padding: 16px 18px; border-radius: 12px; border: 2px solid var(--line); background: var(--slate-2); font-size: 1.2rem; font-weight: 700; cursor: pointer; }
+.opts button .k { font-family: var(--f-latin); color: var(--honey); font-size: 1.6rem; line-height: 1; flex: none; width: 1.2em; }
+.opts button:active { transform: scale(.98); }
+.opts button.picked { border-color: var(--honey); background: #4a4433; }
+.opts button:disabled:not(.picked) { opacity: .4; }
+.clock { font-family: var(--f-latin); font-size: 3rem; line-height: 1; color: var(--honey); direction: ltr; }
+.clock.low { color: #ff9d7a; }
+.answer { font-weight: 700; font-size: 1.2rem; }
+.place { font-family: var(--f-latin); font-size: 5rem; line-height: 1; direction: ltr; }
+</style>
+</head>
+<body>
+<header><span class="brand">INTEGRATION BEE</span><span class="me" id="me"></span></header>
+<main id="main"><h1>מתחברים...</h1></main>
+
+<script type="module">
+let cfgSeen = false;
+import db, { MOCK } from "./db.js";
+import { LETTERS, fmtSec } from "./game.js";
+const $ = id => document.getElementById(id);
+const main = $("main");
+if (MOCK) document.body.insertAdjacentHTML("beforeend", '<span class="mock-tag">חזרה</span>');
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const screen = (cls, html) => { document.body.className = cls; main.innerHTML = html; };
+
+// keep the screen awake during the game, where the browser allows it
+let wake = null;
+const keepAwake = async () => { try { wake = await navigator.wakeLock?.request("screen"); } catch {} };
+document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") keepAwake(); });
+
+let uid, gid = null, game = null, me = null, unsub = [], tick = null, myChoice = {}, lastKey = "", sending = false;
+try { uid = await db.init(); } catch (e) { screen("", `<h1>לא הצלחנו להתחבר</h1><p class="sub">בדקו שיש חיבור לאינטרנט ורעננו את הדף.</p>`); throw e; }
+keepAwake();
+
+db.watchConfig(c => {
+  const next = c?.gameId || null;
+  if (next === gid && cfgSeen) { if (!gid) render(); return; } cfgSeen = true;
+  unsub.forEach(f => f()); unsub = []; gid = next; game = null; me = null; myChoice = {}; lastKey = "";
+  if (!gid) return render();
+  unsub.push(db.watchGame(gid, g => { game = g; render(); }));
+  unsub.push(db.watchPlayer(gid, uid, p => { me = p; render(); }));
+});
+
+function render() {
+  clearInterval(tick);
+  $("me").textContent = me ? me.name : "";
+  if (!gid || !game) return screen("", `<h1>עוד אין משחק פתוח</h1><p class="sub">ההצטרפות תיפתח בהפוגה של הגמר. השאירו את הדף פתוח.</p>`);
+  const key = [game.phase, game.qn, me?.alive, !!me].join("|");
+  if (key === lastKey && game.phase !== "question") return;
+  lastKey = key;
+
+  if (!me) {
+    if (game.phase !== "lobby") return screen("", `<h1>המשחק כבר התחיל</h1><p class="sub">אפשר לצפות במסך הגדול. נתראה בשנה הבאה!</p>`);
+    screen("", `<h1>תפסו כיסא באולם</h1>
+      <form id="join"><label for="name">השם שיופיע על המסך</label>
+      <input type="text" id="name" maxlength="24" autocomplete="nickname" required>
+      <button class="btn btn-honey big" type="submit">כניסה למשחק</button><p class="err" id="jerr"></p></form>`);
+    const f = $("join");
+    f.onsubmit = async e => {
+      e.preventDefault();
+      const name = $("name").value.trim().slice(0, 24);
+      if (!name) { $("jerr").textContent = "כתבו שם כדי להיכנס."; return; }
+      f.querySelector("button").disabled = true;
+      try { await db.join(gid, name); keepAwake(); }
+      catch (err) { f.querySelector("button").disabled = false; $("jerr").textContent = "ההצטרפות סגורה או שהחיבור נפל. נסו שוב."; }
+    };
+    return;
+  }
+
+  if (game.phase === "lobby") return screen("lit", `<h1>יש לך כיסא באולם!</h1><p>מחכים לשאלה הראשונה.</p><p class="sub">כשתופיע שאלה, עונים כאן בטלפון.</p>`);
+
+  if (game.phase === "question") {
+    const qn = game.qn;
+    if (!me.alive) return spectator();
+    const picked = myChoice[qn];
+    screen("", `<div class="pct">${game.isReserve ? "שאלת חיזוק" : game.pct + "%"}</div>
+      <div class="q" id="q"></div>
+      <div class="opts" id="opts"></div>
+      <div class="clock" id="clock"></div><p class="sub" id="state"></p>`);
+    $("q").textContent = game.q;
+    game.opts.forEach((o, i) => {
+      const b = document.createElement("button"); b.type = "button";
+      b.innerHTML = `<span class="k">${LETTERS[i]}</span><span></span>`; b.lastChild.textContent = o;
+      if (picked != null || sending || !game.acceptingAnswers) { b.disabled = true; if (picked === i) b.classList.add("picked"); }
+      b.onclick = async () => {
+        if (myChoice[qn] != null || sending || !game.acceptingAnswers) return;
+        sending = true;
+        main.querySelectorAll(".opts button").forEach((x, j) => { x.disabled = true; x.classList.toggle("picked", j === i); });
+        $("state").textContent = "שולחים את התשובה...";
+        let failed = false;
+        try { await db.answer(gid, qn, i); myChoice[qn] = i; }
+        catch (e) {
+          // A refresh may have forgotten a previous successful submission.
+          const prior = await db.getMyAnswer(gid, qn).catch(() => null);
+          if (prior) myChoice[qn] = prior.choice; else failed = true;
+        }
+        sending = false;
+        render();
+        if (failed && game?.phase === "question" && game.qn === qn && $("state")) $("state").textContent = "התשובה לא נקלטה. אם נותר זמן, אפשר לנסות שוב.";
+      };
+      $("opts").appendChild(b);
+    });
+    if (picked != null) $("state").textContent = `ענית ${LETTERS[picked]}. מחכים לחשיפה.`;
+    return countdown();
+  }
+
+  if (game.phase === "reveal") {
+    const right = `<p class="answer">התשובה הנכונה: ${LETTERS[game.answer]} · <span>${esc(game.opts[game.answer])}</span></p>`;
+    if (me.alive) return screen("lit", `<h1>צדקת!</h1><p>${game.final ? "הגעת לאחוזון העליון!" : "נשארת במשחק."}</p>${right}<p class="sub">${game.remaining} עדיין במשחק</p>`);
+    if (me.outQ === game.qn) return screen("out", `<h1>נפסלת</h1>${right}<p class="sub">הגעת עד שאלת ה־${game.isReserve ? "חיזוק" : game.pct + "%"}. תודה ששיחקת!</p>`);
+    return spectator(right);
+  }
+
+  if (game.phase === "end") {
+    const w = game.winners || [], i = w.findIndex(x => x.id === uid);
+    if (i === 0) return screen("lit", `<div class="place">#1</div><h1>ניצחת!</h1><p>גשו לבמה לקבל את הפרס.</p>`);
+    if (i > 0 && i < 5) return screen("lit", `<div class="place">#${i + 1}</div><h1>כמעט!</h1><p>הגעת למקום ה־${i + 1}.</p>`);
+    return screen("", `<h1>${w[0] ? "הזוכה: " + esc(w[0].name) : "המשחק הסתיים"}</h1><p class="sub">תודה ששיחקת! חוזרים לגמר.</p>`);
+  }
+}
+
+function spectator(extra = "") {
+  screen("", `<h1>את/ה צופה</h1><p class="sub">${game.phase === "question" ? "השאלה על המסך הגדול." : ""}</p>${extra}`);
+}
+function countdown() {
+  const c = $("clock"); if (!c || !game.openedAt) return;
+  const step = () => {
+    const left = Math.max(0, Math.ceil(game.seconds - (Date.now() - game.openedAt) / 1000));
+    c.textContent = left; c.classList.toggle("low", left <= 3);
+    if (left <= 0 || !game.acceptingAnswers) {
+      clearInterval(tick);
+      if (myChoice[game.qn] == null) { main.querySelectorAll(".opts button").forEach(x => (x.disabled = true)); $("state").textContent = "הזמן נגמר."; }
+    }
+  };
+  step(); tick = setInterval(step, 250);
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>מסך ההקרנה · האחוזון העליון</title>
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="live.css">
+<style>
+/* Projector: question band on top, the hall as the hero, the ladder at the side. */
+body { padding: 16px; }
+.app { max-width: 1600px; margin: 0 auto; display: grid; gap: 14px; grid-template-columns: minmax(0, 1fr) 300px; grid-template-areas: "top top" "hall side"; }
+.top { grid-area: top; display: flex; align-items: center; gap: 24px; background: var(--board); border: 2px solid rgba(248,248,245,.14); border-radius: 12px; padding: 14px 22px; min-height: 120px; }
+.brand { flex: none; text-align: center; border-inline-end: 2px solid var(--line); padding-inline-end: 22px; min-width: 150px; }
+.brand b { display: block; font-family: var(--f-latin); color: var(--honey); font-size: 3.2rem; line-height: .9; direction: ltr; }
+.brand span { font-family: var(--f-display); color: var(--mist); font-size: .95rem; }
+.question { flex: 1; min-width: 0; }
+.q-meta { color: var(--mist); font-weight: 600; }
+.q-text { font-family: var(--f-display); font-size: clamp(1.4rem, 2.6vw, 2.4rem); line-height: 1.2; text-wrap: balance; }
+.opts { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; margin-top: 12px; }
+.opt { display: flex; align-items: center; gap: 12px; background: var(--slate-2); border: 2px solid var(--line); border-radius: 8px; padding: 8px 14px; font-weight: 700; font-size: 1.25rem; position: relative; overflow: hidden; }
+.opt > * { position: relative; }
+.opt .k { font-family: var(--f-latin); color: var(--honey); font-size: 1.6rem; line-height: 1; }
+.opt .bar { position: absolute; inset: 0 0 0 auto; width: 0; background: rgba(246,199,68,.16); transition: width .9s ease; }
+.opt .n { margin-inline-start: auto; font-family: var(--f-latin); font-size: 1.5rem; color: var(--mist); }
+.opt.right { border-color: var(--ok); }
+.opt.right .bar { background: rgba(124,195,106,.25); }
+.opt.dim { opacity: .55; }
+.timer { flex: none; font-family: var(--f-latin); font-size: 4.4rem; line-height: 1; color: var(--honey); width: 100px; text-align: center; direction: ltr; }
+.timer.low { color: #ff9d7a; }
+
+.hall { grid-area: hall; position: relative; background: radial-gradient(80% 70% at 50% 100%, #3a4045 0%, var(--board) 75%); border-radius: 12px; border: 2px solid rgba(248,248,245,.1); aspect-ratio: 16 / 9.5; max-height: calc(100vh - 190px); width: 100%; overflow: hidden; }
+.hall canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+.count { position: absolute; top: 16px; right: 22px; pointer-events: none; }
+.count b { display: block; font-family: var(--f-latin); font-size: clamp(3.6rem, 7vw, 7rem); line-height: .85; color: var(--honey); direction: ltr; text-align: right; text-shadow: 0 0 30px rgba(246,199,68,.35); font-variant-numeric: tabular-nums; }
+.count span { font-family: var(--f-display); color: var(--mist); font-size: 1.2rem; }
+.banner { position: absolute; left: 50%; top: 42%; transform: translate(-50%, -50%); background: var(--honey); color: var(--slate); font-family: var(--f-display); font-size: clamp(1.6rem, 3.4vw, 3rem); padding: 12px 34px; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,.45); text-align: center; white-space: nowrap; }
+.banner small { display: block; font-family: var(--f-body); font-weight: 700; font-size: .42em; }
+.joinbox { position: absolute; top: 16px; left: 18px; display: flex; gap: 18px; align-items: center; background: rgba(31,34,37,.9); border: 2px solid var(--line); border-radius: 14px; padding: 16px 20px; }
+.joinbox .qr { width: 190px; height: 190px; background: var(--chalk); border-radius: 10px; padding: 10px; }
+.joinbox .qr img, .joinbox .qr svg { width: 100%; height: 100%; display: block; }
+.joinbox b { font-family: var(--f-display); font-size: 1.7rem; display: block; line-height: 1.15; }
+.joinbox span { color: var(--mist); }
+.joinbox .url { direction: ltr; unicode-bidi: isolate; display: block; margin-top: 8px; font-weight: 700; color: var(--chalk); font-size: .95rem; }
+.lift { position: absolute; bottom: 14%; left: 50%; transform: translateX(-50%); font-family: var(--f-display); color: var(--honey); font-size: 1.4rem; white-space: nowrap; }
+
+.winners { position: absolute; inset: 0; display: grid; place-items: center; background: rgba(31,34,37,.82); }
+.winners .box { text-align: center; }
+.winners h2 { font-family: var(--f-display); font-weight: 400; color: var(--honey); font-size: clamp(2rem, 4vw, 3.4rem); margin: 0 0 18px; }
+.winners ol { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; min-width: 420px; }
+.winners li { display: flex; justify-content: space-between; align-items: baseline; gap: 30px; background: var(--slate-2); border: 2px solid var(--line); border-radius: 10px; padding: 10px 24px; font-size: 1.5rem; font-weight: 700; }
+.winners li:first-child { background: var(--honey); color: var(--slate); border-color: var(--honey); font-size: 2.3rem; }
+.winners li i { font-style: normal; font-family: var(--f-latin); letter-spacing: .03em; opacity: .8; }
+.winners p { color: var(--mist); margin-top: 14px; }
+
+.side { grid-area: side; display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.ladder { background: var(--slate-2); border: 2px solid var(--line); border-radius: 12px; padding: 14px 16px; }
+.ladder h2 { font-family: var(--f-display); font-weight: 400; font-size: 1.4rem; margin: 0 0 8px; color: var(--honey); }
+.ladder ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.ladder li { display: flex; justify-content: space-between; align-items: center; padding: 4px 12px; border-radius: 6px; color: var(--mist); font-weight: 600; }
+.ladder li b { font-family: var(--f-latin); font-size: 1.6rem; line-height: 1.1; direction: ltr; color: var(--chalk); }
+.ladder li.done { opacity: .5; }
+.ladder li.now { background: var(--honey); color: var(--slate); }
+.ladder li.now b { color: var(--slate); }
+.ladder .extra { margin-top: 8px; font-weight: 700; color: var(--honey); }
+.signin { grid-column: 1 / -1; display: grid; place-items: center; min-height: 60vh; text-align: center; gap: 12px; }
+.signin h1 { font-family: var(--f-display); font-weight: 400; color: var(--honey); margin: 0; }
+@media (max-width: 1000px) { .app { grid-template-columns: minmax(0, 1fr); grid-template-areas: "top" "hall" "side"; } .joinbox .qr { width: 120px; height: 120px; } }
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <section class="signin" id="signin" hidden>
+    <div>
+      <h1>מסך ההקרנה</h1>
+      <p>המסך הזה מציג את התשובות של כולם, ולכן צריך להתחבר עם חשבון המארגנים.</p>
+      <button class="btn btn-honey" id="signinBtn" type="button">התחברות עם Google</button>
+      <p class="err" id="signinErr"></p>
+    </div>
+  </section>
+
+  <header class="top" id="top" hidden>
+    <div class="brand"><b id="pct">1%</b><span id="pctLbl">האחוזון העליון</span></div>
+    <div class="question">
+      <div class="q-meta" id="qmeta">הפוגה בגמר · Integration Bee</div>
+      <div class="q-text" id="qtext">סרקו את הברקוד ותפסו כיסא באולם</div>
+      <div class="opts" id="opts"></div>
+    </div>
+    <div class="timer" id="timer"></div>
+  </header>
+
+  <section class="hall" id="hall" hidden aria-label="מפת אולם לב">
+    <canvas id="cv"></canvas>
+    <div class="count"><b id="count">0</b><span id="countLbl">התיישבו באולם</span></div>
+    <div class="joinbox" id="joinbox"><div class="qr" id="qr"></div><div><b>הצטרפו<br>מהטלפון</b><span>סורקים, מקלידים שם,<br>ומקבלים כיסא</span><span class="url" id="joinUrl"></span></div></div>
+    <div class="lift" id="lift" hidden>הרימו את הטלפונים!</div>
+    <div class="banner" id="banner" hidden></div>
+    <div class="winners" id="winners" hidden><div class="box"><h2 id="winTitle"></h2><ol id="winList"></ol><p id="winNote"></p></div></div>
+  </section>
+
+  <aside class="side" id="side" hidden>
+    <div class="ladder"><h2>האחוזון העליון</h2><ol id="ladder"></ol><div class="extra" id="extra" hidden>שאלת חיזוק</div></div>
+  </aside>
+</div>
+
+<script src="vendor/qrcode.js"></script>
+<script type="module">
+let cfgSeen = false;
+import db, { MOCK, link } from "./db.js";
+import { Hall } from "./hall.js";
+import { LETTERS, fmtSec } from "./game.js";
+const $ = id => document.getElementById(id);
+if (MOCK) document.body.insertAdjacentHTML("beforeend", '<span class="mock-tag">חזרה · נתונים מדומים</span>');
+
+let hall, gid = null, game = null, players = [], unsub = [], answered = 0, tick = null, lastPhaseKey = "";
+
+db.onAdmin((u, error) => {
+  $("signin").hidden = !!u;
+  $("signinErr").textContent = error ? "אין לחשבון הזה הרשאת ניהול. התחברו עם חשבון המארגנת." : "";
+  ["top", "hall", "side"].forEach(id => ($(id).hidden = !u));
+  if (u && !hall) start();
+});
+$("signinBtn").onclick = () => db.adminSignIn().catch(e => ($("signinErr").textContent = "ההתחברות נכשלה: " + (e.code || e.message)));
+
+function start() {
+  hall = new Hall($("cv"));
+  const url = new URL(link("play.html"), location.href).href;
+  $("joinUrl").textContent = url.replace(/^https?:\/\//, "").replace(/\?mock$/, "");
+  const qr = qrcode(0, "M"); qr.addData(url); qr.make();
+  $("qr").innerHTML = qr.createSvgTag({ cellSize: 6, margin: 0, scalable: true });
+  db.watchConfig(c => {
+    const next = c?.gameId || null;
+    if (next === gid && cfgSeen) { if (!gid) render(); return; } cfgSeen = true;
+    unsub.forEach(f => f()); unsub = []; gid = next; game = null; players = []; lastPhaseKey = "";
+    if (!gid) { render(); return; }
+    unsub.push(db.watchGame(gid, g => { game = g; render(); }));
+    unsub.push(db.watchPlayers(gid, p => { players = p; hall.update(p); render(); }));
+  });
+}
+
+let answerUnsub = null, answerQn = null;
+function watchAnswers() {
+  const qn = game?.phase === "question" ? game.qn : null;
+  if (qn === answerQn) return;
+  answerUnsub && answerUnsub(); answerUnsub = null; answerQn = qn; answered = 0;
+  if (qn != null) answerUnsub = db.watchAnswerCount(gid, qn, n => { answered = n; renderCount(); });
+}
+
+const alive = () => players.filter(p => p.alive);
+function setCount(n, lbl) { $("count").textContent = n; $("countLbl").textContent = lbl; }
+function renderCount() {
+  if (!game) return setCount(0, "התיישבו באולם");
+  if (game.phase === "lobby") return setCount(players.length, "התיישבו באולם");
+  if (game.phase === "question") return setCount(answered, `ענו מתוך ${game.aliveBefore ?? alive().length}`);
+  return setCount(alive().length, "נשארו במשחק");
+}
+
+function renderLadder() {
+  const L = game?.ladder || [];
+  $("ladder").innerHTML = L.map((p, i) => ({ p, i })).reverse().map(({ p, i }) => {
+    const pos = game.ladderPos ?? -1, live = game.phase !== "lobby";
+    const cls = !live ? "" : (i === pos && !game.isReserve && game.phase === "question") ? "now" : (i < pos || (i === pos && game.phase !== "question") || (i === pos && game.isReserve)) ? "done" : "";
+    const n = game.passed?.[i]; return `<li class="${cls}"><b>${p}%</b><span>${n != null ? n + " עברו" : ""}</span></li>`;
+  }).join("");
+  $("extra").hidden = !(game?.isReserve && game.phase === "question");
+}
+
+function renderOpts() {
+  const box = $("opts"); box.innerHTML = "";
+  if (!game || !game.opts || game.phase === "lobby") return;
+  const reveal = game.phase === "reveal" || game.phase === "end";
+  const total = (game.counts || []).reduce((a, b) => a + b, 0);
+  game.opts.forEach((o, i) => {
+    const el = document.createElement("div");
+    el.className = "opt" + (reveal && i === game.answer ? " right" : reveal ? " dim" : "");
+    const n = reveal && game.counts ? game.counts[i] : null;
+    el.innerHTML = `<div class="bar"></div><span class="k">${LETTERS[i]}</span><span class="t"></span><span class="n">${n ?? ""}</span>`;
+    el.querySelector(".t").textContent = o;
+    box.appendChild(el);
+    if (reveal && total) requestAnimationFrame(() => (el.querySelector(".bar").style.width = (n / total * 100) + "%"));
+  });
+}
+
+function runTimer() {
+  clearInterval(tick); $("timer").textContent = ""; $("timer").classList.remove("low");
+  if (game?.phase !== "question" || !game.openedAt) return;
+  const step = () => {
+    const left = Math.max(0, Math.ceil(game.seconds - (Date.now() - game.openedAt) / 1000));
+    $("timer").textContent = left; $("timer").classList.toggle("low", left <= 3);
+    if (left <= 0) clearInterval(tick);
+  };
+  step(); tick = setInterval(step, 250);
+}
+
+function banner(html) { const b = $("banner"); if (!html) { b.hidden = true; return; } b.innerHTML = html; b.hidden = false; }
+
+function render() {
+  watchAnswers(); renderCount(); renderLadder();
+  const phase = game?.phase || "none";
+  const key = phase + ":" + (game?.qn ?? "");
+  const changed = key !== lastPhaseKey; lastPhaseKey = key;
+  $("joinbox").hidden = phase !== "lobby" && phase !== "none";
+  $("winners").hidden = phase !== "end";
+  $("lift").hidden = phase !== "reveal";
+  if (phase === "none") { $("qtext").textContent = "אין משחק פתוח. פותחים משחק חדש בלוח הבקרה."; $("qmeta").textContent = ""; $("pct").textContent = "1%"; banner(""); return; }
+  if (phase === "lobby") {
+    $("pct").textContent = "1%"; $("pctLbl").textContent = "האחוזון העליון";
+    $("qmeta").textContent = "הפוגה בגמר · Integration Bee";
+    $("qtext").textContent = "סרקו את הברקוד ותפסו כיסא באולם"; $("qtext").style.direction = "";
+    banner(""); renderOpts(); runTimer(); return;
+  }
+  $("pct").textContent = game.isReserve ? "+" : game.pct + "%";
+  $("pctLbl").textContent = game.isReserve ? "שאלת חיזוק" : "מהקהל יענו נכון";
+  $("qmeta").textContent = game.isReserve ? "שאלת חיזוק" : `שאלה ${game.ladderPos + 1} מתוך ${game.ladder.length} · שאלת ה־${game.pct}%`;
+  $("qtext").textContent = game.q;
+  if (changed) { renderOpts(); runTimer(); }
+  if (phase === "question") banner("");
+  if (phase === "reveal" && changed) {
+    const out = game.eliminated ?? 0, rem = game.remaining ?? 0;
+    setTimeout(() => {
+      if (game.phase !== "reveal") return;
+      banner(rem === 0 ? `כולם נפסלו!<small>זוכה מי שהגיע הכי רחוק</small>` : game.final ? `${rem} ${rem === 1 ? "הגיע/ה" : "הגיעו"} לאחוזון העליון!` : `${out} נפסלו<small>${rem} ממשיכים</small>`);
+    }, 1700);
+  }
+  if (phase === "end") {
+    banner("");
+    const w = game.winners || [];
+    $("winTitle").textContent = w.length ? (game.remaining > 0 && game.final ? "הגיעו לאחוזון העליון" : "הזוכים") : "אין זוכים";
+    $("winList").innerHTML = "";
+    w.slice(0, 5).forEach(x => { const li = document.createElement("li"); li.innerHTML = `<span></span><i></i>`; li.firstChild.textContent = x.name; li.lastChild.textContent = fmtSec(x.ms); $("winList").appendChild(li); });
+    $("winNote").textContent = w.length > 1 ? "בשוויון מכריע זמן התשובה המהיר ביותר" : "";
+  }
+}
+</script>
+</body>
+</html>
