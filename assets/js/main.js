@@ -27,7 +27,7 @@
   });
   $$(".nav a").forEach(a => a.addEventListener("click", () => { nav.classList.remove("open"); menuBtn && menuBtn.setAttribute("aria-expanded", "false"); }));
 
-  $$("[data-year]").forEach(el => (el.textContent = CFG.nextYear));
+  $$("[data-year]").forEach(el => (el.textContent = CFG.editionLabel || CFG.nextYear));
 
   /* ---- registration ---- */
   const regBtn = $("#reg-btn");

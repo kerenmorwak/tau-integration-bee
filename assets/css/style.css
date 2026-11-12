@@ -116,7 +116,7 @@ p { margin: 0 0 1em; }
   text-shadow: 0 3px 0 rgba(0,0,0,.25);
 }
 .hero-title span { display: block; }
-.hero-title .yr { color: var(--chalk); }
+.hero-title .yr { color: var(--chalk); font-family: var(--f-display); font-size: .65em; line-height: 1.25; letter-spacing: 0; direction: rtl; }
 .hero-he { font-family: var(--f-display); font-size: clamp(1.5rem, 2.6vw, 2rem); color: #e5e7e9; margin: 18px 0 26px; }
 .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; }
 
@@ -240,7 +240,7 @@ p { margin: 0 0 1em; }
 /* ---------- page header (inner pages) ---------- */
 .page-head { padding: 60px 0 52px; }
 .page-head h1 { font-size: clamp(2.3rem, 5vw, 3.6rem); color: var(--chalk); }
-.page-head h1 .latin { color: var(--honey); }
+.page-head h1 .latin, .page-head h1 .academic-year { color: var(--honey); }
 .page-head p { color: #c3c8cc; max-width: 60ch; margin: 14px 0 0; font-size: 1.1rem; }
 
 .subnav { position: sticky; top: 64px; z-index: 10; background: var(--paper-2); border-bottom: 1px solid var(--rule); }
