@@ -1,0 +1,6 @@
+# Private live-game question banks stay on the organizer's device or in Firestore.
+questions*.json
+שאלות*.md
+private/
+*.zip
+.DS_Store

@@ -81,3 +81,21 @@ export const mock = {
   },
   reset() { localStorage.removeItem(KEY); bc && bc.postMessage(1); fire(); }
 };
+
+export async function getPlayers(gid) { const g = read().games[gid]; return g ? Object.entries(g.players).map(([id, p]) => ({ id, ...p })) : []; }
+export async function claimReveal(gid, qn) {
+  const s = read(), d = s.games[gid]?.data;
+  if (!d || !["question", "settling"].includes(d.phase) || d.qn !== qn) return null;
+  const before = { ...d }; d.phase = "settling"; d.acceptingAnswers = false; write(s); return before;
+}
+
+export async function finishReveal(gid, qn, players, result) {
+  const finish = () => {
+    const s = read(), g = s.games[gid];
+    if (!g || g.data.phase !== "settling" || g.data.qn !== qn) return false;
+    players.forEach(({ id, patch }) => Object.assign(g.players[id], patch));
+    Object.assign(g.data, result, { acceptingAnswers: false });
+    write(s); return true;
+  };
+  return navigator.locks ? navigator.locks.request(KEY + "-reveal", finish) : finish();
+}

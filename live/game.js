@@ -33,7 +33,7 @@ export function rankWinners({ stay, alive }) {
     .map(p => ({ id: p.id, name: p.name, ms: p.lastMs ?? null }));
 }
 
-export const LETTERS = ["A", "B", "C", "D"];
+export const LETTERS = ["א", "ב", "ג", "ד"];
 export const fmtSec = ms => ms == null ? "" : (ms / 1000).toFixed(1) + " שנ׳";
 
 /** Default question set: examples only, replace them in the control panel. */

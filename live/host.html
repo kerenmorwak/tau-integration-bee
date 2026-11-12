@@ -9,7 +9,7 @@
 <style>
 /* Projector: question band on top, the hall as the hero, the ladder at the side. */
 body { padding: 16px; }
-.app { max-width: 1600px; margin: 0 auto; display: grid; gap: 14px; grid-template-columns: minmax(0, 1fr) 300px; grid-template-areas: "top top" "hall side"; }
+.app { max-width: 1600px; margin: 0 auto; display: grid; gap: 14px; grid-template-columns: minmax(0, 1fr) 300px; grid-template-areas: "top top" "hall side"; grid-template-rows: auto minmax(0, 1fr); height: calc(100vh - 32px); }
 .top { grid-area: top; display: flex; align-items: center; gap: 24px; background: var(--board); border: 2px solid rgba(248,248,245,.14); border-radius: 12px; padding: 14px 22px; min-height: 120px; }
 .brand { flex: none; text-align: center; border-inline-end: 2px solid var(--line); padding-inline-end: 22px; min-width: 150px; }
 .brand b { display: block; font-family: var(--f-latin); color: var(--honey); font-size: 3.2rem; line-height: .9; direction: ltr; }
@@ -17,6 +17,7 @@ body { padding: 16px; }
 .question { flex: 1; min-width: 0; }
 .q-meta { color: var(--mist); font-weight: 600; }
 .q-text { font-family: var(--f-display); font-size: clamp(1.4rem, 2.6vw, 2.4rem); line-height: 1.2; text-wrap: balance; }
+.q-note { margin-top: 10px; color: var(--honey-soft); font-size: 1.15rem; font-weight: 600; text-wrap: balance; }
 .opts { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; margin-top: 12px; }
 .opt { display: flex; align-items: center; gap: 12px; background: var(--slate-2); border: 2px solid var(--line); border-radius: 8px; padding: 8px 14px; font-weight: 700; font-size: 1.25rem; position: relative; overflow: hidden; }
 .opt > * { position: relative; }
@@ -29,7 +30,7 @@ body { padding: 16px; }
 .timer { flex: none; font-family: var(--f-latin); font-size: 4.4rem; line-height: 1; color: var(--honey); width: 100px; text-align: center; direction: ltr; }
 .timer.low { color: #ff9d7a; }
 
-.hall { grid-area: hall; position: relative; background: radial-gradient(80% 70% at 50% 100%, #3a4045 0%, var(--board) 75%); border-radius: 12px; border: 2px solid rgba(248,248,245,.1); aspect-ratio: 16 / 9.5; max-height: calc(100vh - 190px); width: 100%; overflow: hidden; }
+.hall { grid-area: hall; position: relative; background: radial-gradient(80% 70% at 50% 100%, #3a4045 0%, var(--board) 75%); border-radius: 12px; border: 2px solid rgba(248,248,245,.1); width: 100%; height: 100%; min-height: 320px; overflow: hidden; }
 .hall canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
 .count { position: absolute; top: 16px; right: 22px; pointer-events: none; }
 .count b { display: block; font-family: var(--f-latin); font-size: clamp(3.6rem, 7vw, 7rem); line-height: .85; color: var(--honey); direction: ltr; text-align: right; text-shadow: 0 0 30px rgba(246,199,68,.35); font-variant-numeric: tabular-nums; }
@@ -65,7 +66,7 @@ body { padding: 16px; }
 .ladder .extra { margin-top: 8px; font-weight: 700; color: var(--honey); }
 .signin { grid-column: 1 / -1; display: grid; place-items: center; min-height: 60vh; text-align: center; gap: 12px; }
 .signin h1 { font-family: var(--f-display); font-weight: 400; color: var(--honey); margin: 0; }
-@media (max-width: 1000px) { .app { grid-template-columns: minmax(0, 1fr); grid-template-areas: "top" "hall" "side"; } .joinbox .qr { width: 120px; height: 120px; } }
+@media (max-width: 1000px) { .app { grid-template-columns: minmax(0, 1fr); grid-template-areas: "top" "hall" "side"; height: auto; grid-template-rows: auto; } .hall { height: auto; aspect-ratio: 16 / 10; } .joinbox .qr { width: 120px; height: 120px; } }
 </style>
 </head>
 <body>
@@ -85,6 +86,7 @@ body { padding: 16px; }
       <div class="q-meta" id="qmeta">הפוגה בגמר · Integration Bee</div>
       <div class="q-text" id="qtext">סרקו את הברקוד ותפסו כיסא באולם</div>
       <div class="opts" id="opts"></div>
+      <div class="q-note" id="qnote" hidden></div>
     </div>
     <div class="timer" id="timer"></div>
   </header>
@@ -106,9 +108,11 @@ body { padding: 16px; }
 <script src="vendor/qrcode.js"></script>
 <script type="module">
 let cfgSeen = false;
-import db, { MOCK, link } from "./db.js";
-import { Hall } from "./hall.js";
-import { LETTERS, fmtSec } from "./game.js";
+import db, { MOCK, link } from "./db.js?v=20261112-reading2";
+import { Hall } from "./hall.js?v=20261112-reading2";
+import { LETTERS, fmtSec } from "./game.js?v=20261112-reading2";
+import { autoReveal } from "./admin.js?v=20261112-reading2";
+let autoKey = null, autoCancel = () => {};
 const $ = id => document.getElementById(id);
 if (MOCK) document.body.insertAdjacentHTML("beforeend", '<span class="mock-tag">חזרה · נתונים מדומים</span>');
 
@@ -152,17 +156,19 @@ function renderCount() {
   if (!game) return setCount(0, "התיישבו באולם");
   if (game.phase === "lobby") return setCount(players.length, "התיישבו באולם");
   if (game.phase === "question") return setCount(answered, `ענו מתוך ${game.aliveBefore ?? alive().length}`);
+  if (game.phase === "reading") return setCount(alive().length, "במשחק");
   return setCount(alive().length, "נשארו במשחק");
 }
 
+const asking = () => ["reading", "question", "settling"].includes(game?.phase);
 function renderLadder() {
   const L = game?.ladder || [];
   $("ladder").innerHTML = L.map((p, i) => ({ p, i })).reverse().map(({ p, i }) => {
     const pos = game.ladderPos ?? -1, live = game.phase !== "lobby";
-    const cls = !live ? "" : (i === pos && !game.isReserve && game.phase === "question") ? "now" : (i < pos || (i === pos && game.phase !== "question") || (i === pos && game.isReserve)) ? "done" : "";
+    const cls = !live ? "" : (i === pos && !game.isReserve && asking()) ? "now" : (i < pos || (i === pos && !asking()) || (i === pos && game.isReserve)) ? "done" : "";
     const n = game.passed?.[i]; return `<li class="${cls}"><b>${p}%</b><span>${n != null ? n + " עברו" : ""}</span></li>`;
   }).join("");
-  $("extra").hidden = !(game?.isReserve && game.phase === "question");
+  $("extra").hidden = !(game?.isReserve && asking());
 }
 
 function renderOpts() {
@@ -195,13 +201,16 @@ function runTimer() {
 function banner(html) { const b = $("banner"); if (!html) { b.hidden = true; return; } b.innerHTML = html; b.hidden = false; }
 
 function render() {
-  watchAnswers(); renderCount(); renderLadder();
+  watchAnswers();
+  const ak = ["question", "settling"].includes(game?.phase) ? gid + ":" + game.qn + ":" + game.phase : null;
+  if (ak !== autoKey) { autoCancel(); autoKey = ak; autoCancel = ak ? autoReveal(db, gid, game) : () => {}; } renderCount(); renderLadder();
   const phase = game?.phase || "none";
   const key = phase + ":" + (game?.qn ?? "");
   const changed = key !== lastPhaseKey; lastPhaseKey = key;
   $("joinbox").hidden = phase !== "lobby" && phase !== "none";
   $("winners").hidden = phase !== "end";
   $("lift").hidden = phase !== "reveal";
+  if (phase === "none" || phase === "lobby") $("qnote").hidden = true;
   if (phase === "none") { $("qtext").textContent = "אין משחק פתוח. פותחים משחק חדש בלוח הבקרה."; $("qmeta").textContent = ""; $("pct").textContent = "1%"; banner(""); return; }
   if (phase === "lobby") {
     $("pct").textContent = "1%"; $("pctLbl").textContent = "האחוזון העליון";
@@ -211,10 +220,12 @@ function render() {
   }
   $("pct").textContent = game.isReserve ? "+" : game.pct + "%";
   $("pctLbl").textContent = game.isReserve ? "שאלת חיזוק" : "מהקהל יענו נכון";
-  $("qmeta").textContent = game.isReserve ? "שאלת חיזוק" : `שאלה ${game.ladderPos + 1} מתוך ${game.ladder.length} · שאלת ה־${game.pct}%`;
+  $("qmeta").textContent = (game.isReserve ? "שאלת חיזוק" : `שאלה ${game.ladderPos + 1} מתוך ${game.ladder.length} · שאלת ה־${game.pct}%`) + (game.title ? ` · ${game.title}` : "");
   $("qtext").textContent = game.q;
   if (changed) { renderOpts(); runTimer(); }
-  if (phase === "question") banner("");
+  if (phase === "question" || phase === "reading") banner("");
+  const showNote = (phase === "reveal" || phase === "end") && game.note;
+  $("qnote").hidden = !showNote; if (showNote) $("qnote").textContent = game.note;
   if (phase === "reveal" && changed) {
     const out = game.eliminated ?? 0, rem = game.remaining ?? 0;
     setTimeout(() => {

@@ -15,7 +15,10 @@ body.out { background: var(--out-bg); color: #f6c9bf; }
 header { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; font-weight: 700; }
 header .brand { font-family: var(--f-latin); font-size: 1.5rem; letter-spacing: .03em; direction: ltr; }
 header .me { opacity: .8; font-size: .95rem; }
-main { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 16px; text-align: center; padding: 12px 0; }
+main { flex: 1; display: flex; flex-direction: column; gap: 16px; text-align: center; padding: 12px 0; }
+main > :first-child { margin-top: auto; }
+main > :last-child { margin-bottom: auto; }
+.qtop { display: flex; justify-content: space-between; align-items: center; }
 h1 { font-family: var(--f-display); font-weight: 400; font-size: clamp(2rem, 9vw, 2.8rem); line-height: 1.1; margin: 0; text-wrap: balance; }
 p { margin: 0; font-size: 1.1rem; }
 .sub { opacity: .8; }
@@ -32,7 +35,7 @@ input[type=text]:focus { border-color: var(--honey); outline: none; }
 .opts button:active { transform: scale(.98); }
 .opts button.picked { border-color: var(--honey); background: #4a4433; }
 .opts button:disabled:not(.picked) { opacity: .4; }
-.clock { font-family: var(--f-latin); font-size: 3rem; line-height: 1; color: var(--honey); direction: ltr; }
+.clock { font-family: var(--f-latin); font-size: 2.6rem; line-height: 1; color: var(--honey); direction: ltr; }
 .clock.low { color: #ff9d7a; }
 .answer { font-weight: 700; font-size: 1.2rem; }
 .place { font-family: var(--f-latin); font-size: 5rem; line-height: 1; direction: ltr; }
@@ -44,8 +47,8 @@ input[type=text]:focus { border-color: var(--honey); outline: none; }
 
 <script type="module">
 let cfgSeen = false;
-import db, { MOCK } from "./db.js";
-import { LETTERS, fmtSec } from "./game.js";
+import db, { MOCK } from "./db.js?v=20261112-reading2";
+import { LETTERS, fmtSec } from "./game.js?v=20261112-reading2";
 const $ = id => document.getElementById(id);
 const main = $("main");
 if (MOCK) document.body.insertAdjacentHTML("beforeend", '<span class="mock-tag">חזרה</span>');
@@ -98,21 +101,21 @@ function render() {
 
   if (game.phase === "lobby") return screen("lit", `<h1>יש לך כיסא באולם!</h1><p>מחכים לשאלה הראשונה.</p><p class="sub">כשתופיע שאלה, עונים כאן בטלפון.</p>`);
 
-  if (game.phase === "question") {
-    const qn = game.qn;
+  if (game.phase === "question" || game.phase === "reading" || game.phase === "settling") {
+    const qn = game.qn, reading = game.phase === "reading", settling = game.phase === "settling";
     if (!me.alive) return spectator();
     const picked = myChoice[qn];
-    screen("", `<div class="pct">${game.isReserve ? "שאלת חיזוק" : game.pct + "%"}</div>
+    screen("", `<div class="qtop"><span class="pct">${game.isReserve ? "שאלת חיזוק" : game.pct + "%"}</span><span class="clock" id="clock"></span></div>
       <div class="q" id="q"></div>
       <div class="opts" id="opts"></div>
-      <div class="clock" id="clock"></div><p class="sub" id="state"></p>`);
-    $("q").textContent = game.q;
+      <p class="sub" id="state"></p>`);
+    $("q").textContent = (game.title ? game.title + " · " : "") + game.q;
     game.opts.forEach((o, i) => {
       const b = document.createElement("button"); b.type = "button";
       b.innerHTML = `<span class="k">${LETTERS[i]}</span><span></span>`; b.lastChild.textContent = o;
-      if (picked != null || sending || !game.acceptingAnswers) { b.disabled = true; if (picked === i) b.classList.add("picked"); }
+      if (picked != null || sending || reading || settling || !game.acceptingAnswers) { b.disabled = true; if (picked === i) b.classList.add("picked"); }
       b.onclick = async () => {
-        if (myChoice[qn] != null || sending || !game.acceptingAnswers) return;
+        if (myChoice[qn] != null || sending || game?.phase !== "question" || !game.acceptingAnswers || Date.now() >= game.openedAt + game.seconds * 1000) return;
         sending = true;
         main.querySelectorAll(".opts button").forEach((x, j) => { x.disabled = true; x.classList.toggle("picked", j === i); });
         $("state").textContent = "שולחים את התשובה...";
@@ -130,11 +133,13 @@ function render() {
       $("opts").appendChild(b);
     });
     if (picked != null) $("state").textContent = `ענית ${LETTERS[picked]}. מחכים לחשיפה.`;
+    if (reading) { $("state").textContent = "קוראים את השאלה. התשובות ייפתחו עוד רגע."; return; }
+    if (settling) { $("state").textContent = picked != null ? `ענית ${LETTERS[picked]}. בודקים תשובות...` : "הזמן נגמר. בודקים תשובות..."; return; }
     return countdown();
   }
 
   if (game.phase === "reveal") {
-    const right = `<p class="answer">התשובה הנכונה: ${LETTERS[game.answer]} · <span>${esc(game.opts[game.answer])}</span></p>`;
+    const right = `<p class="answer">התשובה הנכונה: ${LETTERS[game.answer]} · <span>${esc(game.opts[game.answer])}</span></p>` + (game.note ? `<p class="sub">${esc(game.note)}</p>` : "");
     if (me.alive) return screen("lit", `<h1>צדקת!</h1><p>${game.final ? "הגעת לאחוזון העליון!" : "נשארת במשחק."}</p>${right}<p class="sub">${game.remaining} עדיין במשחק</p>`);
     if (me.outQ === game.qn) return screen("out", `<h1>נפסלת</h1>${right}<p class="sub">הגעת עד שאלת ה־${game.isReserve ? "חיזוק" : game.pct + "%"}. תודה ששיחקת!</p>`);
     return spectator(right);
@@ -158,7 +163,7 @@ function countdown() {
     c.textContent = left; c.classList.toggle("low", left <= 3);
     if (left <= 0 || !game.acceptingAnswers) {
       clearInterval(tick);
-      if (myChoice[game.qn] == null) { main.querySelectorAll(".opts button").forEach(x => (x.disabled = true)); $("state").textContent = "הזמן נגמר."; }
+      if (myChoice[game.qn] == null) { main.querySelectorAll(".opts button").forEach(x => (x.disabled = true)); $("state").textContent = "הזמן נגמר. בודקים תשובות..."; }
     }
   };
   step(); tick = setInterval(step, 250);

@@ -6,9 +6,9 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
   getFirestore, doc, collection, getDoc, getDocs, setDoc, updateDoc, onSnapshot,
-  query, where, writeBatch, serverTimestamp
+  query, where, writeBatch, serverTimestamp, runTransaction
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import { firebaseConfig } from "./firebase-config.js";
+import { firebaseConfig } from "./firebase-config.js?v=20261112-reading2";
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
@@ -116,3 +116,30 @@ export const saveQuestions = list => setDoc(doc(db, "admin", "questions"), { lis
 // the running game's private state (its question list with answers), readable by organizers only
 export async function loadState() { const s = await getDoc(doc(db, "admin", "state")); return s.exists() ? s.data() : null; }
 export const saveState = st => setDoc(doc(db, "admin", "state"), st);
+
+export async function getPlayers(gid) {
+  const s = await getDocs(collection(db, "games", gid, "players"));
+  return s.docs.map(d => ({ id: d.id, ...fix(d.data()) }));
+}
+/** Close submissions before reading results; a second screen can resume interrupted settlement. */
+export async function claimReveal(gid, qn) {
+  const ref = doc(db, "games", gid);
+  return runTransaction(db, async tx => {
+    const s = await tx.get(ref);
+    if (!s.exists() || !["question", "settling"].includes(s.data().phase) || s.data().qn !== qn) return null;
+    if (s.data().phase === "question") tx.update(ref, { phase: "settling", acceptingAnswers: false });
+    return fix(s.data());
+  });
+}
+
+// Commit the eliminations and public result together, exactly once for this question.
+export async function finishReveal(gid, qn, players, result) {
+  const ref = doc(db, "games", gid);
+  return runTransaction(db, async tx => {
+    const s = await tx.get(ref);
+    if (!s.exists() || s.data().phase !== "settling" || s.data().qn !== qn) return false;
+    players.forEach(({ id, patch }) => tx.update(doc(db, "games", gid, "players", id), patch));
+    tx.update(ref, { ...result, acceptingAnswers: false });
+    return true;
+  });
+}
