@@ -8,7 +8,7 @@ import {
   getFirestore, doc, collection, getDoc, getDocs, setDoc, updateDoc, onSnapshot,
   query, where, writeBatch, serverTimestamp, runTransaction
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import { firebaseConfig } from "./firebase-config.js?v=20261112-reading2";
+import { firebaseConfig } from "./firebase-config.js?v=20261112-sound4";
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);

@@ -64,6 +64,10 @@ body { padding: 16px; }
 .ladder li.now { background: var(--honey); color: var(--slate); }
 .ladder li.now b { color: var(--slate); }
 .ladder .extra { margin-top: 8px; font-weight: 700; color: var(--honey); }
+.sound { position: fixed; bottom: 12px; right: 14px; z-index: 40; display: flex; align-items: center; gap: 10px; background: rgba(31,34,37,.9); border: 1px solid var(--line); border-radius: 10px; padding: 6px 10px; }
+.sound button { background: transparent; border: 0; color: var(--chalk); font-weight: 700; cursor: pointer; padding: 4px 6px; }
+.sound button[aria-pressed="true"] { color: var(--honey); }
+.sound input { width: 90px; accent-color: var(--honey); }
 .signin { grid-column: 1 / -1; display: grid; place-items: center; min-height: 60vh; text-align: center; gap: 12px; }
 .signin h1 { font-family: var(--f-display); font-weight: 400; color: var(--honey); margin: 0; }
 @media (max-width: 1000px) { .app { grid-template-columns: minmax(0, 1fr); grid-template-areas: "top" "hall" "side"; height: auto; grid-template-rows: auto; } .hall { height: auto; aspect-ratio: 16 / 10; } .joinbox .qr { width: 120px; height: 120px; } }
@@ -105,13 +109,30 @@ body { padding: 16px; }
   </aside>
 </div>
 
+<div class="sound" id="soundBox" hidden>
+  <button type="button" id="soundBtn" aria-pressed="false">הפעלת סאונד</button>
+  <input type="range" id="vol" min="0" max="1" step="0.05" value="0.35" aria-label="עוצמה">
+</div>
 <script src="vendor/qrcode.js"></script>
 <script type="module">
 let cfgSeen = false;
-import db, { MOCK, link } from "./db.js?v=20261112-reading2";
-import { Hall } from "./hall.js?v=20261112-reading2";
-import { LETTERS, fmtSec } from "./game.js?v=20261112-reading2";
-import { autoReveal } from "./admin.js?v=20261112-reading2";
+import db, { MOCK, link } from "./db.js?v=20261112-sound4";
+import { Hall } from "./hall.js?v=20261112-sound4";
+import { LETTERS, fmtSec } from "./game.js?v=20261112-sound4";
+import { autoReveal } from "./admin.js?v=20261112-sound4";
+import { Sound } from "./sound.js?v=20261112-sound4";
+const sound = new Sound();
+function cue() {
+  const ph = game?.phase;
+  if (!sound.on) return;
+  if (!ph) { sound.stop(); return; }
+  if (ph === "lobby") sound.lobby();
+  else if (ph === "reading") sound.reading();
+  else if (ph === "question" && game.openedAt) sound.countdown(Math.max(0, game.seconds - (Date.now() - game.openedAt) / 1000));
+  else if (ph === "settling") sound.roll();
+  else if (ph === "reveal") sound.reveal(game.eliminated ?? 0);
+  else if (ph === "end") sound.fanfare();
+}
 let autoKey = null, autoCancel = () => {};
 const $ = id => document.getElementById(id);
 if (MOCK) document.body.insertAdjacentHTML("beforeend", '<span class="mock-tag">חזרה · נתונים מדומים</span>');
@@ -121,9 +142,15 @@ let hall, gid = null, game = null, players = [], unsub = [], answered = 0, tick 
 db.onAdmin((u, error) => {
   $("signin").hidden = !!u;
   $("signinErr").textContent = error ? "אין לחשבון הזה הרשאת ניהול. התחברו עם חשבון המארגנת." : "";
-  ["top", "hall", "side"].forEach(id => ($(id).hidden = !u));
+  ["top", "hall", "side", "soundBox"].forEach(id => ($(id).hidden = !u));
+  if (!u) sound.disable();
   if (u && !hall) start();
 });
+$("soundBtn").onclick = async () => {
+  if (sound.on) { sound.disable(); $("soundBtn").textContent = "הפעלת סאונד"; $("soundBtn").setAttribute("aria-pressed", "false"); return; }
+  try { await sound.enable(); sound.setVolume(+$("vol").value); $("soundBtn").textContent = "סאונד פועל"; $("soundBtn").setAttribute("aria-pressed", "true"); cue(); } catch { $("soundBtn").textContent = "הסאונד לא הופעל, לחצו לניסיון חוזר"; }
+};
+$("vol").oninput = e => sound.setVolume(+e.target.value);
 $("signinBtn").onclick = () => db.adminSignIn().catch(e => ($("signinErr").textContent = "ההתחברות נכשלה: " + (e.code || e.message)));
 
 function start() {
@@ -205,8 +232,9 @@ function render() {
   const ak = ["question", "settling"].includes(game?.phase) ? gid + ":" + game.qn + ":" + game.phase : null;
   if (ak !== autoKey) { autoCancel(); autoKey = ak; autoCancel = ak ? autoReveal(db, gid, game) : () => {}; } renderCount(); renderLadder();
   const phase = game?.phase || "none";
-  const key = phase + ":" + (game?.qn ?? "");
+  const key = gid + ":" + phase + ":" + (game?.qn ?? "");
   const changed = key !== lastPhaseKey; lastPhaseKey = key;
+  if (changed) cue();
   $("joinbox").hidden = phase !== "lobby" && phase !== "none";
   $("winners").hidden = phase !== "end";
   $("lift").hidden = phase !== "reveal";
@@ -230,7 +258,7 @@ function render() {
     const out = game.eliminated ?? 0, rem = game.remaining ?? 0;
     setTimeout(() => {
       if (game.phase !== "reveal") return;
-      banner(rem === 0 ? `כולם נפסלו!<small>זוכה מי שהגיע הכי רחוק</small>` : game.final ? `${rem} ${rem === 1 ? "הגיע/ה" : "הגיעו"} לאחוזון העליון!` : `${out} נפסלו<small>${rem} ממשיכים</small>`);
+      banner(rem === 0 ? `כולם נפסלו!<small>זוכה מי שהגיע הכי רחוק</small>` : game.final ? `${rem} ${rem === 1 ? "הגיע/ה" : "הגיעו"} לאחוזון העליון!` : out === 0 ? `כולם צדקו!<small>${rem} ממשיכים</small>` : `${out} נפסלו<small>${rem} ממשיכים</small>`);
     }, 1700);
   }
   if (phase === "end") {

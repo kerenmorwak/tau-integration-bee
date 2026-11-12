@@ -1,5 +1,5 @@
 // Organizer-side actions shared by the control panel and the projector screen.
-import { settle, rankWinners } from "./game.js?v=20261112-reading2";
+import { settle, rankWinners } from "./game.js?v=20261112-sound4";
 
 export const GRACE_MS = 2500; // Presentation delay only; the server's answer deadline stays unchanged.
 
@@ -23,7 +23,7 @@ export async function revealNow(db, gid, qn) {
   if (!game.isReserve) passed[game.ladderPos] = r.stay.length;
   return db.finishReveal(gid, game.qn, updates, {
     phase: "reveal", answer: cur.answer, note: cur.note || null, counts: r.counts, remaining: r.stay.length, eliminated: r.out.length,
-    final, passed, winners: final ? rankWinners({ stay: r.stay, alive: before }).slice(0, 5) : null
+    final, passed, winners: final ? rankWinners({ stay: r.stay, alive: before, out: r.out }).slice(0, 5) : null
   });
 }
 

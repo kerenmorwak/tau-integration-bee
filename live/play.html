@@ -47,8 +47,8 @@ input[type=text]:focus { border-color: var(--honey); outline: none; }
 
 <script type="module">
 let cfgSeen = false;
-import db, { MOCK } from "./db.js?v=20261112-reading2";
-import { LETTERS, fmtSec } from "./game.js?v=20261112-reading2";
+import db, { MOCK } from "./db.js?v=20261112-sound4";
+import { LETTERS, fmtSec } from "./game.js?v=20261112-sound4";
 const $ = id => document.getElementById(id);
 const main = $("main");
 if (MOCK) document.body.insertAdjacentHTML("beforeend", '<span class="mock-tag">חזרה</span>');
@@ -61,13 +61,33 @@ const keepAwake = async () => { try { wake = await navigator.wakeLock?.request("
 document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") keepAwake(); });
 
 let uid, gid = null, game = null, me = null, unsub = [], tick = null, myChoice = {}, lastKey = "", sending = false;
+// Store only server-confirmed choices. The server still enforces one answer.
+const choiceKey = () => `tau-bee-choices-${gid}-${uid}`;
+const loadChoices = () => {
+  try { const data = JSON.parse(localStorage.getItem(choiceKey()));
+    return data && typeof data === "object" && !Array.isArray(data)
+      ? Object.fromEntries(Object.entries(data).filter(([q, c]) => /^\d+$/.test(q) && Number.isInteger(c) && c >= 0 && c < 4)) : {};
+  } catch { return {}; }
+};
+const saveChoices = () => { try { localStorage.setItem(choiceKey(), JSON.stringify(myChoice)); } catch {} };
+let answerChecks = new Set(), restoring = new Set();
+async function restoreAnswer(qn) {
+  const gameId = gid, key = `${gameId}:${qn}`;
+  if (answerChecks.has(key) || myChoice[qn] != null) return;
+  answerChecks.add(key); restoring.add(key);
+  try {
+    const prior = await db.getMyAnswer(gameId, qn);
+    if (prior && gid === gameId) { myChoice[qn] = prior.choice; saveChoices(); }
+  } catch {} // A missing document is not readable under the ownership rules. A later submission is still checked by the server.
+  finally { restoring.delete(key); if (gid === gameId) { lastKey = ""; render(); } }
+}
 try { uid = await db.init(); } catch (e) { screen("", `<h1>לא הצלחנו להתחבר</h1><p class="sub">בדקו שיש חיבור לאינטרנט ורעננו את הדף.</p>`); throw e; }
 keepAwake();
 
 db.watchConfig(c => {
   const next = c?.gameId || null;
   if (next === gid && cfgSeen) { if (!gid) render(); return; } cfgSeen = true;
-  unsub.forEach(f => f()); unsub = []; gid = next; game = null; me = null; myChoice = {}; lastKey = "";
+  unsub.forEach(f => f()); unsub = []; gid = next; game = null; me = null; myChoice = loadChoices(); lastKey = ""; answerChecks = new Set(); restoring = new Set();
   if (!gid) return render();
   unsub.push(db.watchGame(gid, g => { game = g; render(); }));
   unsub.push(db.watchPlayer(gid, uid, p => { me = p; render(); }));
@@ -104,6 +124,8 @@ function render() {
   if (game.phase === "question" || game.phase === "reading" || game.phase === "settling") {
     const qn = game.qn, reading = game.phase === "reading", settling = game.phase === "settling";
     if (!me.alive) return spectator();
+    if (!reading) restoreAnswer(qn);
+    const checking = restoring.has(`${gid}:${qn}`);
     const picked = myChoice[qn];
     screen("", `<div class="qtop"><span class="pct">${game.isReserve ? "שאלת חיזוק" : game.pct + "%"}</span><span class="clock" id="clock"></span></div>
       <div class="q" id="q"></div>
@@ -113,18 +135,18 @@ function render() {
     game.opts.forEach((o, i) => {
       const b = document.createElement("button"); b.type = "button";
       b.innerHTML = `<span class="k">${LETTERS[i]}</span><span></span>`; b.lastChild.textContent = o;
-      if (picked != null || sending || reading || settling || !game.acceptingAnswers) { b.disabled = true; if (picked === i) b.classList.add("picked"); }
+      if (picked != null || checking || sending || reading || settling || !game.acceptingAnswers) { b.disabled = true; if (picked === i) b.classList.add("picked"); }
       b.onclick = async () => {
-        if (myChoice[qn] != null || sending || game?.phase !== "question" || !game.acceptingAnswers || Date.now() >= game.openedAt + game.seconds * 1000) return;
+        if (myChoice[qn] != null || checking || sending || game?.phase !== "question" || !game.acceptingAnswers || Date.now() >= game.openedAt + game.seconds * 1000) return;
         sending = true;
         main.querySelectorAll(".opts button").forEach((x, j) => { x.disabled = true; x.classList.toggle("picked", j === i); });
         $("state").textContent = "שולחים את התשובה...";
         let failed = false;
-        try { await db.answer(gid, qn, i); myChoice[qn] = i; }
+        try { await db.answer(gid, qn, i); myChoice[qn] = i; saveChoices(); }
         catch (e) {
           // A refresh may have forgotten a previous successful submission.
           const prior = await db.getMyAnswer(gid, qn).catch(() => null);
-          if (prior) myChoice[qn] = prior.choice; else failed = true;
+          if (prior) { myChoice[qn] = prior.choice; saveChoices(); } else failed = true;
         }
         sending = false;
         render();
@@ -132,6 +154,7 @@ function render() {
       };
       $("opts").appendChild(b);
     });
+    if (checking) $("state").textContent = "בודקים אם כבר ענית...";
     if (picked != null) $("state").textContent = `ענית ${LETTERS[picked]}. מחכים לחשיפה.`;
     if (reading) { $("state").textContent = "קוראים את השאלה. התשובות ייפתחו עוד רגע."; return; }
     if (settling) { $("state").textContent = picked != null ? `ענית ${LETTERS[picked]}. בודקים תשובות...` : "הזמן נגמר. בודקים תשובות..."; return; }

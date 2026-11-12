@@ -107,9 +107,9 @@ textarea { resize: vertical; min-height: 44px; }
 
 <script type="module">
 let cfgSeen = false;
-import db, { MOCK, link } from "./db.js?v=20261112-reading2";
-import { rankWinners, LETTERS, SAMPLE_QUESTIONS, fmtSec } from "./game.js?v=20261112-reading2";
-import { revealNow, autoReveal } from "./admin.js?v=20261112-reading2";
+import db, { MOCK, link } from "./db.js?v=20261112-sound4";
+import { rankWinners, LETTERS, SAMPLE_QUESTIONS, fmtSec } from "./game.js?v=20261112-sound4";
+import { revealNow, autoReveal } from "./admin.js?v=20261112-sound4";
 const $ = id => document.getElementById(id);
 if (MOCK) { document.body.insertAdjacentHTML("beforeend", '<span class="mock-tag">חזרה · נתונים מדומים</span>'); $("mockRow").hidden = false; }
 $("hostLink").href = link("host.html"); $("playLink").href = link("play.html");

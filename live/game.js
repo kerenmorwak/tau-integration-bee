@@ -16,7 +16,7 @@ export function settle({ alive, answers, correct, openedAt, nOpts }) {
   alive.forEach(p => {
     const a = byUid.get(p.id);
     if (a && a.choice === correct) stay.push({ ...p, ms: Math.max(0, a.at - openedAt) });
-    else out.push(p);
+    else out.push(a ? { ...p, ansMs: Math.max(0, a.at - openedAt) } : p);
   });
   return { stay, out, counts, answered: byUid.size };
 }
@@ -27,10 +27,13 @@ export function settle({ alive, answers, correct, openedAt, nOpts }) {
  * If no one survived: everyone who was still in when the question opened (they got furthest),
  * fastest on the previous question first; players with no time yet go last, in join order.
  */
-export function rankWinners({ stay, alive }) {
+export function rankWinners({ stay, alive, out = [] }) {
   if (stay.length) return stay.slice().sort((a, b) => a.ms - b.ms).map(p => ({ id: p.id, name: p.name, ms: p.ms }));
-  return alive.slice().sort((a, b) => (a.lastMs ?? Infinity) - (b.lastMs ?? Infinity) || (a.joinedAt ?? 0) - (b.joinedAt ?? 0))
-    .map(p => ({ id: p.id, name: p.name, ms: p.lastMs ?? null }));
+  // no one survived: if even the first question knocked everyone out, the fastest answer to it decides
+  const ans = new Map(out.map(p => [p.id, p.ansMs]));
+  const t = p => p.lastMs ?? ans.get(p.id) ?? Infinity;
+  return alive.slice().sort((a, b) => t(a) - t(b) || (a.joinedAt ?? 0) - (b.joinedAt ?? 0))
+    .map(p => ({ id: p.id, name: p.name, ms: Number.isFinite(t(p)) ? t(p) : null }));
 }
 
 export const LETTERS = ["א", "ב", "ג", "ד"];
