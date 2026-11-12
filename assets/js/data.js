@@ -6,8 +6,6 @@ window.SITE_CONFIG = {
   editionLabel: "דצמבר 2026",
   // קישור לטופס ההרשמה (למשל Google Forms). כל עוד ריק — יוצג "ההרשמה תיפתח בקרוב".
   registrationUrl: "https://docs.google.com/forms/d/e/1FAIpQLSd91dYxjYSjEintyhr67dhSUX2bqeurY0iB-L4qxKWAh1Jx7w/viewform",
-  // כתובת ההטמעה מ־Google Forms. הטופס יוצג בתוך האתר רק לאחר הגדרתה.
-  registrationEmbedUrl: "https://docs.google.com/forms/d/e/1FAIpQLSd91dYxjYSjEintyhr67dhSUX2bqeurY0iB-L4qxKWAh1Jx7w/viewform?embedded=true",
   // מועדים לתחרות הקרובה. כל עוד ריק — יוצג "יפורסם בהמשך".
   qualifiers: [
     { date: "יום שני, 7.12.2026", time: "12:00–14:00", place: "הכיתה תפורסם בהמשך", lastEntry: "13:30" },

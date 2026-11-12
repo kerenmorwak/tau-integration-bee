@@ -36,14 +36,6 @@
       regBtn.href = CFG.registrationUrl;
       regBtn.textContent = "להרשמה לתחרות · " + (CFG.editionLabel || CFG.nextYear);
       regBtn.target = "_blank"; regBtn.rel = "noopener";
-      const formSection = $("#registration-form");
-      if (CFG.registrationEmbedUrl && formSection) {
-        $("iframe", formSection).src = CFG.registrationEmbedUrl;
-        $("#registration-external", formSection).href = CFG.registrationUrl;
-        formSection.hidden = false;
-        regBtn.href = "#registration-form";
-        regBtn.removeAttribute("target");
-      }
     } else {
       regBtn.removeAttribute("href");
       regBtn.setAttribute("aria-disabled", "true");
