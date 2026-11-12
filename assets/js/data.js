@@ -11,7 +11,7 @@ window.SITE_CONFIG = {
     { date: "יום שני, 7.12.2026", time: "12:00–14:00", place: "הכיתה תפורסם בהמשך", lastEntry: "13:30" },
     { date: "יום רביעי, 9.12.2026", time: "15:00–17:00", place: "הכיתה תפורסם בהמשך", lastEntry: "16:30" },
   ],
-  finalDate: "יום רביעי, 30.12.2026 · 17:00",
+  finalDate: "יום רביעי, 30.12.2026 · 17:30",
   finalPlace: "אולם לב",
   // כתובת ליצירת קשר. כל עוד ריק — לא תוצג.
   contactEmail: "kerenmor@mail.tau.ac.il"
