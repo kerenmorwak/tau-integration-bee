@@ -34,8 +34,16 @@
   if (regBtn) {
     if (CFG.registrationUrl) {
       regBtn.href = CFG.registrationUrl;
-      regBtn.textContent = "להרשמה לתחרות " + CFG.nextYear;
+      regBtn.textContent = "להרשמה לתחרות · " + (CFG.editionLabel || CFG.nextYear);
       regBtn.target = "_blank"; regBtn.rel = "noopener";
+      const formSection = $("#registration-form");
+      if (CFG.registrationEmbedUrl && formSection) {
+        $("iframe", formSection).src = CFG.registrationEmbedUrl;
+        $("#registration-external", formSection).href = CFG.registrationUrl;
+        formSection.hidden = false;
+        regBtn.href = "#registration-form";
+        regBtn.removeAttribute("target");
+      }
     } else {
       regBtn.removeAttribute("href");
       regBtn.setAttribute("aria-disabled", "true");
@@ -43,7 +51,7 @@
     }
     const list = $("#reg-dates");
     const rows = [];
-    if (CFG.qualifiers.length) CFG.qualifiers.forEach((q, i) => rows.push(["מוקדמות" + (CFG.qualifiers.length > 1 ? " · מועד " + (i + 1) : ""), `${q.date} · ${q.time} · ${q.place}`]));
+    if (CFG.qualifiers.length) CFG.qualifiers.forEach((q, i) => rows.push(["מוקדמות" + (CFG.qualifiers.length > 1 ? " · מועד " + (i + 1) : ""), `${q.date}<br><bdi dir="ltr">${q.time}</bdi> · ${q.place}${q.lastEntry ? `<small>תחילת בחינה אחרונה: <bdi dir="ltr">${q.lastEntry}</bdi></small>` : ""}`]));
     else rows.push(["שלב המוקדמות", "יפורסם בהמשך"]);
     rows.push(["הגמר", CFG.finalDate ? CFG.finalDate + (CFG.finalPlace ? " · " + CFG.finalPlace : "") : "יפורסם בהמשך"]);
     rows.push(["מי יכול להשתתף", "סטודנטים לתואר ראשון בפקולטה"]);

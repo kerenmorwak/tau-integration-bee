@@ -5,21 +5,21 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Integration Bee · תחרות האינטגרלים של אוניברסיטת תל אביב</title>
 <meta name="description" content="תחרות האינטגרלים של הפקולטה למדעים מדויקים באוניברסיטת תל אביב: הרשמה, מבנה התחרות, אלופי 2026 ומאגר האינטגרלים מהשנים הקודמות.">
-<meta property="og:title" content="Integration Bee 2027 · אוניברסיטת תל אביב">
-<meta property="og:description" content="תחרות האינטגרלים של הפקולטה למדעים מדויקים">
-<meta property="og:image" content="https://kerenmorwak.github.io/tau-integration-bee/assets/img/og-integration-bee-2027.jpg">
+<meta property="og:title" content="Integration Bee · דצמבר 2026 · אוניברסיטת תל אביב">
+<meta property="og:description" content="מוקדמות: 7 ו־9 בדצמבר. הגמר: 30.12.2026 בשעה 17:00 באולם לב, עם פיצות ושתייה. תחרות האינטגרלים של הפקולטה למדעים מדויקים.">
+<meta property="og:image" content="https://kerenmorwak.github.io/tau-integration-bee/assets/img/og-integration-bee-december-2026.jpg">
 <meta property="og:image:type" content="image/jpeg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="Integration Bee 2027 — תחרות האינטגרלים של אוניברסיטת תל אביב, הפקולטה למדעים מדויקים">
+<meta property="og:image:alt" content="Integration Bee דצמבר 2026 · תחרות האינטגרלים של אוניברסיטת תל אביב, הפקולטה למדעים מדויקים">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://kerenmorwak.github.io/tau-integration-bee/assets/img/og-integration-bee-2027.jpg">
-<meta name="twitter:image:alt" content="Integration Bee 2027 — תחרות האינטגרלים של אוניברסיטת תל אביב, הפקולטה למדעים מדויקים">
+<meta name="twitter:image" content="https://kerenmorwak.github.io/tau-integration-bee/assets/img/og-integration-bee-december-2026.jpg">
+<meta name="twitter:image:alt" content="Integration Bee דצמבר 2026 · תחרות האינטגרלים של אוניברסיטת תל אביב, הפקולטה למדעים מדויקים">
 <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="assets/css/fonts.css">
 <link rel="stylesheet" href="assets/vendor/katex/katex.min.css">
-<link rel="stylesheet" href="assets/css/style.css">
+<link rel="stylesheet" href="assets/css/style.css?v=20261112">
 </head>
 <body>
 
@@ -46,8 +46,9 @@
     <div class="wrap hero-grid">
       <div>
         <img class="hero-logo" src="assets/img/faculty-he-light.png" alt="הפקולטה למדעים מדויקים ע״ש ריימונד ובברלי סאקלר, אוניברסיטת תל אביב" width="1016" height="192">
-        <h1 class="hero-title" aria-label="Integration Bee"><span>INTEGRATION</span><span>BEE <span class="yr" data-year>2027</span></span></h1>
+        <h1 class="hero-title" aria-label="Integration Bee"><span>INTEGRATION</span><span>BEE <span class="yr" data-year>2026</span></span></h1>
         <p class="hero-he">תחרות האינטגרלים של אוניברסיטת תל אביב</p>
+        <p class="hero-kicker">דצמבר 2026 · שנת הלימודים תשפ״ז</p>
         <div class="hero-actions">
           <a class="btn btn-honey" href="#register">פרטים והרשמה</a>
           <a class="btn btn-ghost" href="archive-2026.html">למאגר האינטגרלים</a>
@@ -78,28 +79,50 @@
     <div class="wrap">
       <div class="section-head">
         <div>
-          <h2>תחרות <span class="latin">2027</span></h2>
+          <h2>התחרות הקרובה · דצמבר <span class="latin">2026</span></h2>
           <p>התחרות פתוחה לכל הסטודנטיות והסטודנטים לתואר ראשון בפקולטה למדעים מדויקים.</p>
         </div>
       </div>
       <div class="reg">
         <div class="reg-card">
           <h3>הרשמה</h3>
-          <p class="who">מועדי המוקדמות והגמר יפורסמו כאן עם פתיחת ההרשמה.</p>
+          <p class="who">אוהבות ואוהבים אינטגרלים ואתגרים? הצטרפו לתחרות האינטגרלים של הפקולטה למדעים מדויקים!</p>
           <ul class="reg-dates" id="reg-dates"></ul>
+          <p class="reg-highlight">נפגשים בגמר באולם לב, עם פיצות ושתייה!</p>
+          <p class="reg-arrival">אפשר להגיע בכל זמן בחלון הבחינה של המועד שבחרתם, ולהתחיל עד חצי שעה לפני סיומו.</p>
           <a class="btn btn-honey" id="reg-btn" href="#">להרשמה</a>
           <p class="reg-note" id="reg-contact" hidden></p>
         </div>
         <div id="format">
           <ol class="steps">
-            <li><div><h3>מוקדמות</h3><p>מבחן כתוב: 20 אינטגרלים ב־30 דקות, בלי מחשבון. תשעת ההישגים הגבוהים עולים לגמר.</p></div></li>
-            <li><div><h3>שלב הבתים</h3><p>שלושה סבבים של שלושה מתמודדים. בכל סבב שלושה אינטגרלים, עד 3 דקות לכל אחד, פותרים על הלוח מול הקהל. מכל סבב עולה אחד.</p></div></li>
-            <li><div><h3>הגמר</h3><p>שלושת העולים פותרים אינטגרל אחד. שני הפתרונות הנכונים הראשונים עולים לדו־קרב.</p></div></li>
-            <li><div><h3>דו־קרב סופי</h3><p>שלושה אינטגרלים, עד 5 דקות לכל אחד. מי שצובר יותר נקודות זוכה בתואר אלוף תחרות האינטגרלים.</p></div></li>
+            <li><div><h3>20 אינטגרלים. 30 דקות.</h3><p><strong>המטרה היא לפתור נכון כמה שיותר אינטגרלים בזמן המוקצב.</strong> אין צורך להספיק את כולם כדי להשתתף.</p></div></li>
+            <li><div><h3>נכונות הפתרונות וזמן הפתרון</h3><p>בעת קבלת טופס הבחינה נרשמת שעת הכניסה, ובסיום נרשמת שעת היציאה. העלייה לגמר נקבעת לפי שקלול של נכונות הפתרונות וזמן הפתרון.</p></div></li>
+            <li><div><h3>מה מביאים?</h3><p>יש להביא כלי כתיבה. אין להשתמש במחשבונים או בחומר עזר.</p></div></li>
+            <li><div><h3>9 עולים לגמר</h3><p>תשעת המשתתפים בעלי התוצאות הטובות ביותר יעלו לגמר, שיתקיים ביום רביעי, 30 בדצמבר 2026, בשעה 17:00 באולם לב.</p></div></li>
           </ol>
-          <p style="margin-top:20px"><a class="link-arrow" href="assets/docs/rules-2026.pdf">התקנון המלא (PDF)</a></p>
+          <p style="margin-top:20px"><a class="link-arrow" href="simulation.html">מתרגלים לקראת המוקדמות</a></p>
+          <details class="final-format">
+            <summary>איך יתקיים הגמר?</summary>
+            <p><strong>שלב הבתים:</strong> שלושה מקצים של שלושה מתמודדים. בכל מקצה שלושה אינטגרלים, עד 3 דקות לכל אינטגרל. פותרים על הלוח מול הקהל, ומכל מקצה עולה מתמודד אחד.</p>
+            <p><strong>שלב הגמר:</strong> שלושת העולים פותרים אינטגרל אחד. שני הפותרים הנכונים הראשונים עולים לדו קרב הסופי.</p>
+            <p><strong>דו קרב סופי:</strong> שלושה אינטגרלים, עד 5 דקות לכל אחד. מי שצובר יותר נקודות זוכה בתואר אלוף תחרות האינטגרלים.</p>
+          </details>
         </div>
       </div>
+    </div>
+  </section>
+
+  <section class="section section-alt" id="registration-form" aria-labelledby="registration-form-title" hidden>
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <h2 id="registration-form-title">נרשמים לתחרות</h2>
+          <p>ממלאים את הפרטים ובוחרים מועד למוקדמות. ההרשמה נקלטת לאחר לחיצה על ״שליחה״ וקבלת אישור בטופס.</p>
+          <p class="form-help">הטופס דורש כניסה לחשבון Google ומאפשר הרשמה אחת לכל משתתף. אם הטופס אינו מופיע, אפשר לפתוח אותו בחלון נפרד.</p>
+        </div>
+        <a class="link-arrow" id="registration-external" target="_blank" rel="noopener">פתיחת הטופס בחלון נפרד</a>
+      </div>
+      <iframe class="registration-embed" title="טופס הרשמה לתחרות האינטגרלים" loading="lazy"></iframe>
     </div>
   </section>
 
@@ -201,7 +224,7 @@
 </footer>
 
 <script src="assets/vendor/katex/katex.min.js"></script>
-<script src="assets/js/data.js"></script>
-<script src="assets/js/main.js"></script>
+<script src="assets/js/data.js?v=20261112"></script>
+<script src="assets/js/main.js?v=20261112"></script>
 </body>
 </html>

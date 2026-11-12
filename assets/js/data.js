@@ -2,17 +2,21 @@
    הגדרות האתר — כאן מעדכנים את פרטי התחרות הקרובה
    ============================================================ */
 window.SITE_CONFIG = {
-  nextYear: 2027,
+  nextYear: 2026,
+  editionLabel: "דצמבר 2026",
   // קישור לטופס ההרשמה (למשל Google Forms). כל עוד ריק — יוצג "ההרשמה תיפתח בקרוב".
-  registrationUrl: "",
+  registrationUrl: "https://docs.google.com/forms/d/e/1FAIpQLSd91dYxjYSjEintyhr67dhSUX2bqeurY0iB-L4qxKWAh1Jx7w/viewform",
+  // כתובת ההטמעה מ־Google Forms. הטופס יוצג בתוך האתר רק לאחר הגדרתה.
+  registrationEmbedUrl: "https://docs.google.com/forms/d/e/1FAIpQLSd91dYxjYSjEintyhr67dhSUX2bqeurY0iB-L4qxKWAh1Jx7w/viewform?embedded=true",
   // מועדים לתחרות הקרובה. כל עוד ריק — יוצג "יפורסם בהמשך".
   qualifiers: [
-    // { date: "31.05.27", time: "15:00–17:00", place: "שרייבר 007" },
+    { date: "יום שני, 7.12.2026", time: "12:00–14:00", place: "הכיתה תפורסם בהמשך", lastEntry: "13:30" },
+    { date: "יום רביעי, 9.12.2026", time: "15:00–17:00", place: "הכיתה תפורסם בהמשך", lastEntry: "16:30" },
   ],
-  finalDate: "",   // למשל "11.06.27 · 16:30"
-  finalPlace: "",  // למשל "אולם לב"
+  finalDate: "יום רביעי, 30.12.2026 · 17:00",
+  finalPlace: "אולם לב",
   // כתובת ליצירת קשר. כל עוד ריק — לא תוצג.
-  contactEmail: ""
+  contactEmail: "kerenmor@mail.tau.ac.il"
 };
 
 /* ============================================================
