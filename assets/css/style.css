@@ -143,6 +143,7 @@ p { margin: 0 0 1em; }
 .facts .wrap { display: grid; grid-template-columns: repeat(5, 1fr); }
 .fact { padding: 22px 18px; border-inline-start: 1px solid rgba(43,47,51,.2); }
 .fact:first-child { border-inline-start: 0; }
+.facts-caption { margin: 0; padding: 14px 20px 0; text-align: center; font-weight: 700; font-size: 1rem; }
 .fact .cur { font-family: var(--f-body); font-weight: 700; font-size: 1.7rem; margin-inline-start: 6px; vertical-align: 4px; }
 .fact b { display: block; font-family: var(--f-latin); font-size: 2.6rem; line-height: 1; direction: ltr; text-align: right; }
 .fact span { font-weight: 600; font-size: .98rem; }
