@@ -8,8 +8,8 @@ window.SITE_CONFIG = {
   registrationUrl: "https://docs.google.com/forms/d/e/1FAIpQLSd91dYxjYSjEintyhr67dhSUX2bqeurY0iB-L4qxKWAh1Jx7w/viewform",
   // מועדים לתחרות הקרובה. כל עוד ריק — יוצג "יפורסם בהמשך".
   qualifiers: [
-    { date: "יום שני, 7.12.2026", time: "12:00–14:00", place: "הכיתה תפורסם בהמשך", lastEntry: "13:30" },
-    { date: "יום רביעי, 9.12.2026", time: "15:00–17:00", place: "הכיתה תפורסם בהמשך", lastEntry: "16:30" },
+    { date: "יום שני, 7.12.2026", time: "12:00–14:00", place: "צ׳ק פוינט, חדר 002", lastEntry: "13:30" },
+    { date: "יום רביעי, 9.12.2026", time: "15:00–17:00", place: "דן דוד, חדר 203", lastEntry: "16:30" },
   ],
   finalDate: "יום רביעי, 30.12.2026",
   finalPlace: "אולם לב",
