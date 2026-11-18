@@ -19,7 +19,7 @@
 <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="assets/css/fonts.css">
 <link rel="stylesheet" href="assets/vendor/katex/katex.min.css">
-<link rel="stylesheet" href="assets/css/style.css?v=20261112-academic">
+<link rel="stylesheet" href="assets/css/style.css?v=20261118-spoilers">
 </head>
 <body>
 
@@ -66,9 +66,13 @@
           <h2>מבחן המוקדמות</h2>
           <p>20 אינטגרלים ב־30 דקות, בלי מחשבון. ניגשו כ־50 סטודנטים ממתמטיקה, פיזיקה ומדעי המחשב. log מציין לוגריתם טבעי, ובאינטגרלים לא מסוימים אין צורך בקבוע.</p>
         </div>
-        <div class="tools"><button class="btn btn-line" type="button" data-toggle-all="qual-grid">הצגת כל התשובות</button></div>
       </div>
-      <div class="problems" id="qual-grid"></div>
+      <div class="archive-spoiler" data-spoiler="האינטגרלים">
+        <div class="spoiler-content" inert aria-hidden="true">
+          <div class="tools"><button class="btn btn-line" type="button" data-toggle-all="qual-grid">הצגת כל התשובות</button></div>
+          <div class="problems" id="qual-grid"></div>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -79,9 +83,13 @@
           <h2>הגמר · 11 ביוני 2026</h2>
           <p>תשעה מתמודדים, שלושה סבבי בתים, גמר ודו־קרב. כל אינטגרל נפתר על הלוח מול הקהל.</p>
         </div>
-        <div class="tools"><button class="btn btn-line" type="button" data-toggle-all="finals-wrap">הצגת כל התשובות</button></div>
       </div>
-      <div id="finals-wrap"></div>
+      <div class="archive-spoiler" data-spoiler="האינטגרלים">
+        <div class="spoiler-content" inert aria-hidden="true">
+          <div class="tools"><button class="btn btn-line" type="button" data-toggle-all="finals-wrap">הצגת כל התשובות</button></div>
+          <div id="finals-wrap"></div>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -92,8 +100,10 @@
           <h2>מצגת הגמר</h2>
           <p>המצגת שהוקרנה באולם לאורך הערב. אפשר לדפדף בחצים במקלדת.</p>
         </div>
-        <a class="link-arrow" href="assets/docs/final-slides-2026.pdf">הורדת המצגת (PDF)</a>
       </div>
+      <div class="archive-spoiler" data-spoiler="המצגת">
+        <div class="spoiler-content" inert aria-hidden="true">
+          <a class="link-arrow" href="assets/docs/final-slides-2026.pdf">הורדת המצגת (PDF)</a>
       <div class="viewer" id="viewer" data-count="26" tabindex="0" aria-label="מצגת הגמר">
         <div class="viewer-stage"><img src="assets/img/slides/s-01.jpg" alt=""></div>
         <div class="viewer-bar">
@@ -102,6 +112,8 @@
           <button type="button" data-next>הבאה</button>
         </div>
         <div class="thumbs"></div>
+      </div>
+        </div>
       </div>
     </div>
   </section>
@@ -150,10 +162,14 @@
   <section class="section section-alt" id="downloads">
     <div class="wrap">
       <div class="section-head"><div><h2>קבצים להורדה</h2></div></div>
+      <div class="archive-spoiler" data-spoiler="הקבצים">
+        <div class="spoiler-content" inert aria-hidden="true">
       <div class="downloads">
         <a class="dl" href="assets/docs/qualifying-exam-2026.pdf"><svg width="34" height="38" viewBox="0 0 60 68" aria-hidden="true"><path d="M30 2 57 17.5v33L30 66 3 50.5v-33z" fill="#f6c744"/><path d="M30 20v24m-10-9 10 10 10-10" fill="none" stroke="#2b2f33" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg><div><b>מבחן המוקדמות</b><span>PDF · 11 עמודים</span></div></a>
         <a class="dl" href="assets/docs/final-slides-2026.pdf"><svg width="34" height="38" viewBox="0 0 60 68" aria-hidden="true"><path d="M30 2 57 17.5v33L30 66 3 50.5v-33z" fill="#f6c744"/><path d="M30 20v24m-10-9 10 10 10-10" fill="none" stroke="#2b2f33" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg><div><b>מצגת הגמר</b><span>PDF · 26 שקופיות</span></div></a>
         <a class="dl" href="assets/docs/rules-2026.pdf"><svg width="34" height="38" viewBox="0 0 60 68" aria-hidden="true"><path d="M30 2 57 17.5v33L30 66 3 50.5v-33z" fill="#f6c744"/><path d="M30 20v24m-10-9 10 10 10-10" fill="none" stroke="#2b2f33" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg><div><b>תקנון הגמר</b><span>PDF · 3 עמודים</span></div></a>
+      </div>
+        </div>
       </div>
     </div>
   </section>
@@ -168,6 +184,6 @@
 
 <script src="assets/vendor/katex/katex.min.js"></script>
 <script src="assets/js/data.js?v=20261118-venues"></script>
-<script src="assets/js/main.js?v=20261112-academic"></script>
+<script src="assets/js/main.js?v=20261118-spoilers"></script>
 </body>
 </html>

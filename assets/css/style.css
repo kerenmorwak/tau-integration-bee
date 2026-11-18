@@ -248,6 +248,17 @@ p { margin: 0 0 1em; }
 .subnav a { white-space: nowrap; text-decoration: none; font-weight: 600; padding: 7px 14px; border-radius: 999px; color: var(--muted); }
 .subnav a:hover { color: var(--ink); background: var(--paper); }
 
+/* ---------- archive spoiler warning ---------- */
+.archive-spoiler { overflow: hidden; }
+.spoiler-notice { background: var(--paper-2); border: 1px solid var(--rule); border-inline-start: 5px solid var(--honey); border-radius: 8px; padding: 22px 24px; margin-bottom: 24px; }
+.spoiler-notice h3 { margin-bottom: 10px; }
+.spoiler-notice p { color: var(--muted); max-width: 78ch; margin-bottom: 16px; }
+.spoiler-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+.spoiler-content[aria-hidden="true"] { filter: blur(9px); max-height: 300px; overflow: hidden; user-select: none; pointer-events: none; }
+.spoiler-content > .tools, .spoiler-content > .link-arrow { margin-bottom: 20px; }
+.spoiler-content > .link-arrow { display: inline-block; }
+@media (max-width: 680px) { .spoiler-notice { padding: 18px; } .spoiler-actions .btn { flex: 1 1 180px; text-align: center; } }
+
 /* ---------- problems ---------- */
 .tools { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
 .problems { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; counter-reset: p; }

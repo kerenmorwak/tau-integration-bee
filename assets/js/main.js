@@ -66,6 +66,30 @@
     });
   });
 
+  /* ---- archive spoilers: each visit starts concealed, including direct section links ---- */
+  $$("[data-spoiler]").forEach((panel, i) => {
+    const content = $(".spoiler-content", panel);
+    content.id = "spoiler-content-" + i;
+    const notice = document.createElement("div");
+    notice.className = "spoiler-notice";
+    notice.innerHTML = `<div><h3>לפני שמציצים באינטגרלים</h3>
+      <p>המאגר כולל את האינטגרלים שמופיעים בסימולציה. חשיפה מוקדמת שלהם או של התשובות עלולה לקלקל את חוויית הסימולציה. מומלץ לנסות אותה קודם.</p></div>
+      <div class="spoiler-actions"><button class="btn btn-honey" type="button" aria-expanded="false"></button>
+      <a class="btn btn-line" href="simulation.html">קודם לסימולציה</a></div>`;
+    const button = $("button", notice);
+    const label = panel.dataset.spoiler;
+    button.textContent = "חשיפת " + label;
+    button.setAttribute("aria-controls", content.id);
+    button.addEventListener("click", () => {
+      const reveal = content.inert;
+      content.inert = !reveal;
+      content.setAttribute("aria-hidden", String(!reveal));
+      button.setAttribute("aria-expanded", String(reveal));
+      button.textContent = reveal ? "הסתרה מחדש" : "חשיפת " + label;
+    });
+    panel.prepend(notice);
+  });
+
   /* ---- problem cards ---- */
   function problemCard(p, label) {
     const el = document.createElement("article");
