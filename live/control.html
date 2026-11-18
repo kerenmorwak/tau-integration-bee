@@ -69,6 +69,7 @@ textarea { resize: vertical; min-height: 44px; }
         <div class="stat"><span id="sAnsLbl">ענו</span><b id="sAns"></b></div>
       </div>
       <div class="now" id="now"></div>
+      <p class="hint" id="timingHint">כל שאלה נפתחת מיד ל־15 שניות, כולל זמן ההקראה. התשובה נחשפת אוטומטית בסיום.</p>
       <div class="actions">
         <button class="btn btn-honey main" id="mainBtn" type="button">משחק חדש</button>
         <div class="row">
@@ -108,8 +109,8 @@ textarea { resize: vertical; min-height: 44px; }
 <script type="module">
 let cfgSeen = false;
 import db, { MOCK, link } from "./db.js?v=20261112-sound4";
-import { rankWinners, LETTERS, SAMPLE_QUESTIONS, fmtSec } from "./game.js?v=20261112-sound4";
-import { revealNow, autoReveal } from "./admin.js?v=20261112-sound4";
+import { rankWinners, LETTERS, SAMPLE_QUESTIONS, QUESTION_SECONDS, fmtSec } from "./game.js?v=20261118-auto15";
+import { revealNow, autoReveal } from "./admin.js?v=20261118-auto15";
 const $ = id => document.getElementById(id);
 if (MOCK) { document.body.insertAdjacentHTML("beforeend", '<span class="mock-tag">חזרה · נתונים מדומים</span>'); $("mockRow").hidden = false; }
 $("hostLink").href = link("host.html"); $("playLink").href = link("play.html");
@@ -191,7 +192,8 @@ function render() {
   }
 
   if (ph === "reading") {
-    main.textContent = `התחלת השעון · ${game.seconds} שנ׳`; main.disabled = busy; main.onclick = startClock;
+    // Compatibility for a question left in the old reading stage before this update.
+    main.textContent = `התחלת השעון · ${QUESTION_SECONDS} שנ׳`; main.disabled = busy; main.onclick = startClock;
     const m = document.createElement("div"); m.className = "meta"; m.textContent = "השאלה על המסך ובטלפונים. מקריאים אותה, ואז מתחילים את השעון."; now.prepend(m);
     return;
   }
@@ -201,7 +203,7 @@ function render() {
     main.disabled = busy; main.onclick = reveal;
     const step = () => {
       const left = Math.max(0, Math.ceil(game.seconds - (Date.now() - game.openedAt) / 1000));
-      main.textContent = left > 0 ? `חשיפה עכשיו (חשיפה אוטומטית בעוד ${left} שנ׳)` : "חושפים...";
+      main.textContent = left > 0 ? `חשיפה עכשיו (נותרו ${left} שנ׳ למענה)` : "חושפים...";
       if (left <= 0) clearInterval(tick);
     };
     step(); tick = setInterval(step, 250);
@@ -230,7 +232,7 @@ async function act(fn) {
 
 const newGame = () => act(async () => {
   const qs = questions.map(cleanQuestion);
-  if (qs.some(q => !valid(q))) throw new Error("בדקו שלכל שאלה יש שתי אפשרויות לפחות, תשובה נכונה וזמן של 3 עד 60 שניות.");
+  if (qs.some(q => !valid(q))) throw new Error("בדקו שלכל שאלה יש שתי אפשרויות לפחות ותשובה נכונה.");
   if (!qs.filter(q => !q.reserve).length) throw new Error("צריך לפחות שאלה אחת שאינה שאלת חיזוק.");
   state = { questions: qs, current: null };
   await db.saveState(state);
@@ -246,21 +248,28 @@ function openQ(useReserve) {
     state.current = { qn, answer: q.answer, reserve: !!useReserve, note: q.note || "", pct: q.pct };
     await db.saveState(state);
     await db.patchGame(gid, {
-      phase: "reading", acceptingAnswers: false, qn, title: q.title || "", q: q.q, opts: q.opts, pct: q.pct ?? 0, seconds: q.seconds || 10, openedAt: null, note: null,
+      phase: "question", acceptingAnswers: true, qn, title: q.title || "", q: q.q, opts: q.opts, pct: q.pct ?? 0, seconds: QUESTION_SECONDS, openedAt: db.SERVER_TIME, note: null,
       isReserve: !!useReserve, ladderPos: useReserve ? game.ladderPos : game.mainIdx,
       mainIdx: useReserve ? game.mainIdx : game.mainIdx + 1, resIdx: useReserve ? game.resIdx + 1 : game.resIdx,
       aliveBefore: alive().length, answer: null, counts: null, remaining: null, eliminated: null, final: false, winners: null
     });
+    scheduleMockAnswers();
   });
 }
 const startClock = () => act(async () => {
-  await db.patchGame(gid, { phase: "question", acceptingAnswers: true, openedAt: db.SERVER_TIME });
+  await db.patchGame(gid, { phase: "question", acceptingAnswers: true, seconds: QUESTION_SECONDS, openedAt: db.SERVER_TIME });
+  scheduleMockAnswers();
+});
+function scheduleMockAnswers() {
   if (MOCK) {
     const cur = state.current;
+    const roundId = gid, qn = cur.qn;
     const acc = cur.reserve ? .5 : ({ 90: .95, 80: .9, 70: .85, 50: .75, 40: .7, 30: .65, 10: .55, 5: .45, 1: .35 }[cur.pct] ?? .6);
-    setTimeout(() => db.mock.botsAnswer(gid, acc, cur.answer), 1200);
+    setTimeout(() => {
+      if (gid === roundId && game?.qn === qn && game.phase === "question") db.mock.botsAnswer(roundId, acc, cur.answer);
+    }, 1200);
   }
-});
+}
 $("reserveBtn").onclick = () => openQ(true);
 
 const reveal = () => act(() => revealNow(db, gid, game.qn));
@@ -291,7 +300,7 @@ const valid = q => q.q.trim() && q.opts.length >= 2 && q.opts.length <= 4 && q.o
 function cleanQuestion(q) {
   const entries = q.opts.map((o, i) => ({ text: (o || "").trim(), i })).filter(o => o.text);
   return { ...q, title: (q.title || "").trim(), note: (q.note || "").trim(), q: q.q.trim(), opts: entries.map(o => o.text), answer: entries.findIndex(o => o.i === q.answer),
-    seconds: Number(q.seconds), pct: q.reserve ? 0 : Number(q.pct) };
+    seconds: QUESTION_SECONDS, pct: q.reserve ? 0 : Number(q.pct) };
 }
 function renderQuestions() {
   const box = $("qlist"); box.innerHTML = "";
@@ -303,7 +312,7 @@ function renderQuestions() {
     el.innerHTML = `
       <div class="qhead"><span class="num">${label}</span>
         <label>אחוז <input type="number" min="0" max="100" data-f="pct" ${q.reserve ? "disabled" : ""}></label>
-        <label>שניות <input type="number" min="3" max="60" data-f="seconds"></label>
+        <span class="hint">${QUESTION_SECONDS} שניות כולל הקראה</span>
         <label><input type="checkbox" data-f="reserve"> שאלת חיזוק</label>
         <span class="tools"><button type="button" data-a="up" aria-label="למעלה">↑</button><button type="button" data-a="down" aria-label="למטה">↓</button><button type="button" data-a="del" aria-label="מחיקה">✕</button></span>
       </div>
@@ -312,7 +321,6 @@ function renderQuestions() {
       ${[0, 1, 2, 3].map(j => `<div class="optrow"><input type="radio" name="ans${i}" value="${j}" aria-label="תשובה נכונה ${LETTERS[j]}"><span class="k">${LETTERS[j]}</span><input type="text" data-o="${j}" placeholder="${j < 2 ? "אפשרות" : "אפשרות (לא חובה)"}"></div>`).join("")}
       <textarea data-f="note" rows="2" aria-label="משפט לחשיפה" placeholder="משפט לחשיפה (מופיע על המסך אחרי התשובה, לא חובה)"></textarea>`;
     el.querySelector('[data-f="pct"]').value = q.pct ?? "";
-    el.querySelector('[data-f="seconds"]').value = q.seconds ?? 10;
     el.querySelector('[data-f="reserve"]').checked = !!q.reserve;
     el.querySelector('[data-f="q"]').value = q.q;
     el.querySelector('[data-f="note"]').value = q.note || "";
@@ -321,7 +329,7 @@ function renderQuestions() {
     el.querySelector(`input[type=radio][value="${q.answer}"]`).checked = true;
     el.addEventListener("input", e => {
       const t = e.target;
-      if (t.dataset.f === "pct") q.pct = +t.value; else if (t.dataset.f === "seconds") q.seconds = +t.value;
+      if (t.dataset.f === "pct") q.pct = +t.value;
       else if (t.dataset.f === "q") q.q = t.value; else if (t.dataset.f === "note") q.note = t.value; else if (t.dataset.f === "title") q.title = t.value; else if (t.dataset.o != null) { q.opts[+t.dataset.o] = t.value; }
       else if (t.type === "radio") q.answer = +t.value;
       $("saveMsg").textContent = "יש שינויים שלא נשמרו"; $("saveMsg").className = "hint";
@@ -346,7 +354,7 @@ $("importFile").onchange = async e => {
     const imported = list.map(q => {
       if (!q || typeof q.q !== "string" || !Array.isArray(q.opts) || q.opts.length > 4 || q.opts.some(o => typeof o !== "string")
         || (q.title != null && typeof q.title !== "string") || (q.note != null && typeof q.note !== "string")) throw new Error("invalid question");
-      return cleanQuestion({ title: q.title || "", pct: q.pct ?? 0, seconds: q.seconds ?? 10, q: q.q, opts: q.opts,
+      return cleanQuestion({ title: q.title || "", pct: q.pct ?? 0, seconds: QUESTION_SECONDS, q: q.q, opts: q.opts,
         answer: q.answer ?? 0, note: q.note || "", reserve: !!q.reserve });
     });
     if (imported.some(q => !valid(q))) throw new Error("invalid question");
@@ -356,7 +364,7 @@ $("importFile").onchange = async e => {
   } catch { $("saveMsg").textContent = "הקובץ לא נקרא. צריך קובץ JSON של שאלות."; $("saveMsg").className = "err"; }
   e.target.value = "";
 };
-$("addQ").onclick = () => { questions.push({ pct: 50, seconds: 10, q: "", opts: ["", "", "", ""], answer: 0 }); renderQuestions(); };
+$("addQ").onclick = () => { questions.push({ pct: 50, seconds: QUESTION_SECONDS, q: "", opts: ["", "", "", ""], answer: 0 }); renderQuestions(); };
 $("saveQ").onclick = async () => {
   const clean = questions.map(cleanQuestion);
   const bad = clean.findIndex(q => !valid(q));

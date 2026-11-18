@@ -1,5 +1,5 @@
 // Organizer-side actions shared by the control panel and the projector screen.
-import { settle, rankWinners } from "./game.js?v=20261112-sound4";
+import { settle, rankWinners } from "./game.js?v=20261118-auto15";
 
 export const GRACE_MS = 2500; // Presentation delay only; the server's answer deadline stays unchanged.
 
